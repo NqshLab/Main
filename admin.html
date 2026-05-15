@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NqshLab — Admin</title>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:  { DEFAULT: '#071E1B', deep: '#050F0D' },
+            teal: { DEFAULT: '#2DD4A5', dim: '#1A8A6E'  },
+          },
+          fontFamily: {
+            sans:    ['ThmanyahSans', 'system-ui', 'sans-serif'],
+            display: ['ThmanyahSerifDisplay', 'Georgia', 'serif'],
+            mono:    ['"DM Mono"', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <script>(function(){var t=localStorage.getItem('nqsh_theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+  <style>
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+
+    /* ── DARK MODE (default) ─────────────────────────────── */
+    :root {
+      --bg:            #0a0a0a;
+      --bg-deep:       #000000;
+      --fg:            #ffffff;
+      --fg-hi:         rgba(255,255,255,0.85);
+      --fg-md:         rgba(255,255,255,0.55);
+      --fg-lo:         rgba(255,255,255,0.42);
+      --fg-vl:         rgba(255,255,255,0.3);
+      --fg-ul:         rgba(255,255,255,0.2);
+      --surface:       rgba(255,255,255,0.05);
+      --surface-hi:    rgba(255,255,255,0.09);
+      --border:        rgba(45,212,165,0.14);
+      --border-hi:     rgba(45,212,165,0.22);
+      --border-sm:     rgba(45,212,165,0.09);
+      --teal:          #2DD4A5;
+      --teal-link:     #2DD4A5;
+      --teal-md:       rgba(45,212,165,0.6);
+      --teal-lo:       rgba(45,212,165,0.4);
+      --teal-vl:       rgba(45,212,165,0.15);
+      --teal-ul:       rgba(45,212,165,0.07);
+      --teal-surface:  rgba(45,212,165,0.05);
+      --teal-brd:      rgba(45,212,165,0.2);
+      --nav-bg:        rgba(10,10,10,0.97);
+      --header-bg:     rgba(10,10,10,0.97);
+      --header-border: rgba(45,212,165,0.09);
+      --ink-inner:     #0a0a0a;
+      --grid-color:    rgba(45,212,165,0.08);
+      --red-surface:   rgba(255,80,60,0.04);
+      --red-border:    rgba(255,80,60,0.18);
+      --section-alt:   rgba(255,255,255,0.02);
+      --modal-bg:      #111111;
+      --modal-border:  rgba(45,212,165,0.15);
+      --select-bg:     #0a0a0a;
+    }
+
+    /* ── LIGHT MODE ──────────────────────────────────────── */
+    [data-theme="light"] {
+      --bg:            #ffffff;
+      --bg-deep:       #f2f7f5;
+      --fg:            #0A1C19;
+      --fg-hi:         rgba(10,28,25,0.85);
+      --fg-md:         rgba(10,28,25,0.6);
+      --fg-lo:         rgba(10,28,25,0.45);
+      --fg-vl:         rgba(10,28,25,0.35);
+      --fg-ul:         rgba(10,28,25,0.25);
+      --surface:       rgba(0,0,0,0.035);
+      --surface-hi:    rgba(0,0,0,0.06);
+      --border:        rgba(45,212,165,0.25);
+      --border-hi:     rgba(45,212,165,0.38);
+      --border-sm:     rgba(45,212,165,0.18);
+      --teal:          #2DD4A5;
+      --teal-link:     #0A7A5E;
+      --teal-md:       rgba(10,122,94,0.75);
+      --teal-lo:       rgba(10,122,94,0.55);
+      --teal-vl:       rgba(45,212,165,0.22);
+      --teal-ul:       rgba(45,212,165,0.1);
+      --teal-surface:  rgba(45,212,165,0.08);
+      --teal-brd:      rgba(45,212,165,0.35);
+      --nav-bg:        rgba(255,255,255,0.97);
+      --header-bg:     rgba(255,255,255,0.97);
+      --header-border: rgba(45,212,165,0.18);
+      --ink-inner:     #ffffff;
+      --grid-color:    rgba(45,212,165,0.1);
+      --red-surface:   rgba(255,80,60,0.06);
+      --red-border:    rgba(255,80,60,0.2);
+      --section-alt:   rgba(0,0,0,0.02);
+      --modal-bg:      #ffffff;
+      --modal-border:  rgba(45,212,165,0.25);
+      --select-bg:     #ffffff;
+    }
+
+    html { background: var(--bg); }
+    body { background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+
+    .glass      { background: var(--surface);      border: 1px solid var(--border);   }
+    .glass-teal { background: var(--teal-surface); border: 1px solid var(--teal-brd);  }
+    .glass-red  { background: var(--red-surface);  border: 1px solid var(--red-border);}
+    .fade-top   { border-top: 1px solid var(--border-sm); }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .mono-label {
+      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--teal-link);
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    }
+    .mono-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    select option { background: var(--select-bg); color: var(--fg); }
+    :root select, :root input { color-scheme: dark; }
+    [data-theme="light"] select, [data-theme="light"] input { color-scheme: light; }
+
+    #root:empty::before { content:''; display:block; height:100vh; background:var(--bg); }
+    @keyframes spin   { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation: fadeIn 0.2s ease forwards; }
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+
+    /* ═══════════════════════════════════════════════════════
+       FIREBASE
+    ═══════════════════════════════════════════════════════ */
+    firebase.initializeApp({
+      apiKey: "AIzaSyACErx-oPDy-LHw1RkhNak1nwYuDbFOMBs",
+      authDomain: "nqshlab.firebaseapp.com",
+      projectId: "nqshlab",
+      storageBucket: "nqshlab.firebasestorage.app",
+      messagingSenderId: "19755138224",
+      appId: "1:19755138224:web:e75f9d694267cb32ac4f75",
+    });
+    const auth = firebase.auth();
+
+    /* ═══════════════════════════════════════════════════════
+       TRANSLATIONS
+    ═══════════════════════════════════════════════════════ */
+    const T = {
+      en: {
+        adminBadge: 'ADMIN',
+        tabs: { projects:'Projects', users:'Users', annotator:'My Annotator View', client:'Client View' },
+        signOut: 'Sign out', themeLight: '☀', themeDark: '☾',
+        editUser: 'Edit', editUserAccent: 'user',
+        emailLbl: 'Email', displayName: 'Display name', roleLbl: 'Role',
+        roles: { annotator:'Annotator', client:'Client', admin:'Admin' },
+        fieldOfExpertise: 'Field of expertise', degreeQual: 'Degree / qualification',
+        noneOpt: '— None —', specifyField: 'Please specify field', specifyDegree: 'Please specify degree',
+        cancel: 'Cancel', saveChanges: 'Save changes',
+        newProjectHead: 'New', newProjectAccent: 'project', editProjectHead: 'Edit project',
+        titleLbl: 'Title', titlePh: 'Project title', domainLbl: 'Domain', taskTypeLbl: 'Task type',
+        reqExpertise: 'Required expertise', descLbl: 'Description', descPh: 'Brief description of the annotation task',
+        statusLbl: 'Status', totalItemsLbl: 'Total items', budgetLbl: 'Budget ($)', estDeliveryLbl: 'Estimated delivery',
+        assignClient: 'Assign to client', noClientOpt: '— No client assigned —',
+        assignAnnotators: 'Assign annotators', selectDegreeAuto: 'Select degree to auto-assign…',
+        autoSelect: 'Auto-select',
+        selectedCount: (n) => `${n} selected`,
+        matchesField: (f) => `★ = matches ${f}`,
+        annotatorCount: (n) => `${n} annotator${n !== 1 ? 's' : ''}`,
+        createProject: 'Create project',
+        deleteProjectTitle: 'Delete project?',
+        permanentlyRemoved: (t) => `"${t}" will be permanently removed.`,
+        delete: 'Delete', editBtn: 'Edit', deleteBtn: 'Delete',
+        statuses: { scoping:'Scoping', in_progress:'In progress', in_review:'In review', delivered:'Delivered' },
+        projectsTitle: 'Projects',
+        projectsCount: (total, active) => `${total} total · ${active} active`,
+        newProjectBtn: '+ New project',
+        clientLbl: 'Client', requiresLbl: 'Requires', annotatorsLbl: 'Annotators',
+        progressLbl: 'Progress', budgetCol: 'Budget',
+        unassigned: '— unassigned —', noneAnnotators: '— none —',
+        noProjects: 'No projects yet. Create one above.',
+        usersTitle: 'Users',
+        usersCount: (c, a) => `${c} clients · ${a} annotators`,
+        clientsSection: 'Clients', annotatorsSection: 'Annotators',
+        allFields: 'All fields', allDegrees: 'All degrees',
+        shownOf: (s, t) => `${s} of ${t} shown`,
+        noProjectsAssigned: 'No projects assigned', notAssigned: 'Not assigned to any project',
+        noClients: 'No clients registered yet.',
+        noAnnotators: 'No annotators registered yet.', noAnnotatorsFilter: 'No annotators match these filters.',
+        clientViewTitle: 'Client', clientViewAccent: 'view',
+        clientViewDebug: 'Debug mode — shows all projects as a client would see them',
+        clientViewBadge: 'Client view',
+        statsActive: 'Active', statsInReview: 'In review', statsDelivered: 'Delivered', statsBudget: 'Total budget',
+        started: 'Started', estDelivery2: 'Est. delivery', noProjectsYet: 'No projects yet.',
+        annotatorViewBadge: 'Annotator view',
+        noProfileMsg: 'No annotator profile set — run the console setup to add your field & degree',
+        earnedLbl: 'Total earned', pendingLbl: 'Pending payment', completedLbl: 'Tasks completed',
+        activeProjectLbl: 'Active project', noActiveProject: 'No active project assigned.',
+        availableProjectsLbl: 'Available projects',
+        noAvailableNoProfile: 'Set up your annotator profile to see matched projects.',
+        noAvailableField: 'No available projects match your field.',
+        expectedPay: (a) => `$${a} expected`,
+        forbiddenTitle: 'Admin access', forbiddenAccent: 'required.',
+        forbiddenMsg: 'This page is restricted to NqshLab admin accounts.',
+        forbiddenBtn: '← Back to NqshLab',
+      },
+      ar: {
+        adminBadge: 'مشرف',
+        tabs: { projects:'المشاريع', users:'المستخدمون', annotator:'عرضي كموسِّم', client:'عرض العميل' },
+        signOut: 'خروج', themeLight: '☀', themeDark: '☾',
+        editUser: 'تعديل', editUserAccent: 'المستخدم',
+        emailLbl: 'البريد الإلكتروني', displayName: 'الاسم المعروض', roleLbl: 'الدور',
+        roles: { annotator:'موسِّم', client:'عميل', admin:'مشرف' },
+        fieldOfExpertise: 'مجال الخبرة', degreeQual: 'الشهادة / المؤهل',
+        noneOpt: '— بدون —', specifyField: 'حدّد مجالك', specifyDegree: 'حدّد شهادتك',
+        cancel: 'إلغاء', saveChanges: 'حفظ التغييرات',
+        newProjectHead: 'مشروع', newProjectAccent: 'جديد', editProjectHead: 'تعديل المشروع',
+        titleLbl: 'العنوان', titlePh: 'عنوان المشروع', domainLbl: 'المجال', taskTypeLbl: 'نوع المهمة',
+        reqExpertise: 'الخبرة المطلوبة', descLbl: 'الوصف', descPh: 'وصف مختصر لمهمة التوسيم',
+        statusLbl: 'الحالة', totalItemsLbl: 'إجمالي العناصر', budgetLbl: 'الميزانية ($)', estDeliveryLbl: 'التسليم المتوقع',
+        assignClient: 'تعيين للعميل', noClientOpt: '— بدون عميل —',
+        assignAnnotators: 'تعيين الموسِّمين', selectDegreeAuto: 'اختر شهادة للتعيين التلقائي…',
+        autoSelect: 'تحديد تلقائي',
+        selectedCount: (n) => `${n} محدد`,
+        matchesField: (f) => `★ = يطابق ${f}`,
+        annotatorCount: (n) => `${n} موسِّم`,
+        createProject: 'إنشاء المشروع',
+        deleteProjectTitle: 'حذف المشروع؟',
+        permanentlyRemoved: (t) => `"${t}" سيُحذف نهائياً.`,
+        delete: 'حذف', editBtn: 'تعديل', deleteBtn: 'حذف',
+        statuses: { scoping:'في التقييم', in_progress:'جارٍ', in_review:'في المراجعة', delivered:'مُسلَّم' },
+        projectsTitle: 'المشاريع',
+        projectsCount: (total, active) => `${total} إجمالي · ${active} نشط`,
+        newProjectBtn: '+ مشروع جديد',
+        clientLbl: 'العميل', requiresLbl: 'يتطلب', annotatorsLbl: 'الموسِّمون',
+        progressLbl: 'التقدم', budgetCol: 'الميزانية',
+        unassigned: '— غير مُعيَّن —', noneAnnotators: '— لا أحد —',
+        noProjects: 'لا توجد مشاريع. أنشئ أحدها أعلاه.',
+        usersTitle: 'المستخدمون',
+        usersCount: (c, a) => `${c} عميل · ${a} موسِّم`,
+        clientsSection: 'العملاء', annotatorsSection: 'الموسِّمون',
+        allFields: 'كل المجالات', allDegrees: 'كل الشهادات',
+        shownOf: (s, total) => `${s} من ${total} معروض`,
+        noProjectsAssigned: 'لم تُعيَّن مشاريع', notAssigned: 'غير مُعيَّن لأي مشروع',
+        noClients: 'لم يُسجَّل عملاء بعد.',
+        noAnnotators: 'لم يُسجَّل موسِّمون بعد.', noAnnotatorsFilter: 'لا يوجد موسِّمون يطابقون هذه الفلاتر.',
+        clientViewTitle: 'عرض', clientViewAccent: 'العميل',
+        clientViewDebug: 'وضع التطوير — يعرض كل المشاريع كما يراها العميل',
+        clientViewBadge: 'عرض العميل',
+        statsActive: 'نشط', statsInReview: 'في المراجعة', statsDelivered: 'مُسلَّم', statsBudget: 'الميزانية الإجمالية',
+        started: 'بدأ', estDelivery2: 'التسليم المتوقع', noProjectsYet: 'لا توجد مشاريع بعد.',
+        annotatorViewBadge: 'عرض الموسِّم',
+        noProfileMsg: 'لم يُضبط ملف الموسِّم — شغِّل إعداد الكونسول لإضافة مجالك وشهادتك',
+        earnedLbl: 'إجمالي المكتسب', pendingLbl: 'في انتظار الدفع', completedLbl: 'المهام المكتملة',
+        activeProjectLbl: 'المشروع الحالي', noActiveProject: 'لا يوجد مشروع نشط مُعيَّن.',
+        availableProjectsLbl: 'المشاريع المتاحة',
+        noAvailableNoProfile: 'أضبط ملف الموسِّم لرؤية المشاريع المناسبة.',
+        noAvailableField: 'لا توجد مشاريع متاحة تطابق مجالك.',
+        expectedPay: (a) => `${a}$ متوقع`,
+        forbiddenTitle: 'مطلوب صلاحية', forbiddenAccent: 'المشرف.',
+        forbiddenMsg: 'هذه الصفحة مقتصرة على مشرفي نقش لاب.',
+        forbiddenBtn: 'رجوع إلى نقش لاب →',
+      },
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       CONSTANTS
+    ═══════════════════════════════════════════════════════ */
+    const EXPERTISE_FIELDS = ['Law','Medicine','Finance','Computer Science','Mathematics','Linguistics','Life Sciences','Chemistry','Physics','Social Sciences','Other'];
+    const DEGREE_LEVELS    = ['PhD','MD','JD','Master\'s','Bachelor\'s','Professional Cert.','Other'];
+    const DOMAINS          = ['Healthcare','Legal','Finance','AI / LLMs','Life Sciences','Scientific Research','Other'];
+    const TASK_TYPES       = ['classification','preference','sentiment','extraction'];
+    const STATUSES         = ['scoping','in_progress','in_review','delivered'];
+    const REQUIRED_FIELDS  = ['Any field','Law','Medicine','Finance','Computer Science','Mathematics','Linguistics','Life Sciences','Chemistry','Physics','Social Sciences'];
+
+    const STATUS_COLOR = {
+      scoping:     { color:'rgba(160,160,160,0.8)', bg:'rgba(160,160,160,0.07)', border:'rgba(160,160,160,0.18)' },
+      in_progress: { color:'#fbbf24', bg:'rgba(251,191,36,0.08)',  border:'rgba(251,191,36,0.22)' },
+      in_review:   { color:'#a78bfa', bg:'rgba(167,139,250,0.08)', border:'rgba(167,139,250,0.22)' },
+      delivered:   { color:'#2DD4A5', bg:'rgba(45,212,165,0.08)',  border:'rgba(45,212,165,0.22)' },
+    };
+
+    const INITIAL_USERS = [
+      { uid:'u-001', name:'Sarah Chen',       email:'sarah@medai.com',     role:'client',    field:'',                 degree:'' },
+      { uid:'u-002', name:'James Okafor',     email:'james@lextech.io',    role:'client',    field:'',                 degree:'' },
+      { uid:'u-003', name:'Dr. Amira Hassan', email:'amira@research.edu',  role:'annotator', field:'Medicine',         degree:'MD'        },
+      { uid:'u-004', name:'Luca Ferretti',    email:'luca@unilaw.it',      role:'annotator', field:'Law',              degree:'JD'        },
+      { uid:'u-005', name:'Yuki Tanaka',      email:'yuki@ailab.jp',       role:'annotator', field:'Computer Science', degree:'PhD'       },
+      { uid:'u-006', name:'Priya Nair',       email:'priya@finresearch.in',role:'annotator', field:'Finance',          degree:'PhD'       },
+      { uid:'u-007', name:'Omar El-Sayed',    email:'omar@biotech.eg',     role:'annotator', field:'Life Sciences',    degree:'Master\'s' },
+    ];
+
+    const INITIAL_PROJECTS = [
+      { id:'proj-001', title:'Medical Record Classification', domain:'Healthcare',    type:'classification', description:'Classify 2,400 de-identified patient notes into triage categories.', status:'in_progress', totalItems:2400, completedItems:1380, requiredField:'Medicine',         clientId:'u-001', annotatorIds:['u-003','u-007'], startDate:'2026-04-18', estimatedDelivery:'2026-05-12', rewardUSD:1240 },
+      { id:'proj-002', title:'Contract Clause Labeling',      domain:'Legal',         type:'classification', description:'Label 800 contract clauses across 5 categories.',                    status:'in_review',   totalItems:800,  completedItems:800,  requiredField:'Law',              clientId:'u-002', annotatorIds:['u-004'],         startDate:'2026-03-29', estimatedDelivery:'2026-05-06', rewardUSD:980  },
+      { id:'proj-003', title:'LLM Preference Dataset',        domain:'AI / LLMs',     type:'preference',     description:'Preference labeling of 1,200 prompt-response pairs for RLHF.',      status:'delivered',   totalItems:1200, completedItems:1200, requiredField:'Computer Science', clientId:'u-001', annotatorIds:['u-005','u-003'], startDate:'2026-02-10', estimatedDelivery:'2026-03-15', rewardUSD:1560 },
+      { id:'proj-004', title:'Financial News Sentiment',      domain:'Finance',        type:'sentiment',      description:'Sentiment labels for 3,000 financial headlines.',                    status:'scoping',     totalItems:3000, completedItems:0,    requiredField:'Finance',          clientId:'u-002', annotatorIds:[],                startDate:'',           estimatedDelivery:'',           rewardUSD:0    },
+    ];
+
+    function genId() { return 'proj-' + Math.random().toString(36).slice(2,8); }
+
+    /* ═══════════════════════════════════════════════════════
+       HOOKS
+    ═══════════════════════════════════════════════════════ */
+    const THEME_KEY = 'nqsh_theme';
+    function useTheme() {
+      const [theme, setThemeState] = React.useState(() => localStorage.getItem(THEME_KEY) || 'dark');
+      const setTheme = (v) => {
+        localStorage.setItem(THEME_KEY, v);
+        document.documentElement.setAttribute('data-theme', v);
+        setThemeState(v);
+      };
+      React.useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, []);
+      return [theme, setTheme];
+    }
+
+    const LANG_KEY = 'nqsh_lang';
+    function useLang() {
+      const [lang, setLangState] = React.useState(() => localStorage.getItem(LANG_KEY) || 'en');
+      const setLang = (l) => {
+        localStorage.setItem(LANG_KEY, l);
+        document.documentElement.dir  = l === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = l;
+        setLangState(l);
+      };
+      React.useEffect(() => {
+        document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+      }, []);
+      return [lang, setLang];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       BRAND
+    ═══════════════════════════════════════════════════════ */
+    function NqshMark({ size = 26 }) {
+      return (
+        <svg width={size} height={size} viewBox="0 0 46 46" fill="none" aria-hidden="true">
+          <line x1="23" y1="5"  x2="23" y2="18" stroke="#2DD4A5" strokeWidth="1.4" strokeLinecap="round" opacity="0.8"/>
+          <line x1="23" y1="28" x2="23" y2="41" stroke="#2DD4A5" strokeWidth="1.4" strokeLinecap="round" opacity="0.8"/>
+          <line x1="36" y1="12" x2="26" y2="20" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" style={{color:'var(--fg)'}}/>
+          <line x1="36" y1="34" x2="26" y2="26" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" style={{color:'var(--fg)'}}/>
+          <line x1="10" y1="12" x2="20" y2="20" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" style={{color:'var(--fg)'}}/>
+          <line x1="10" y1="34" x2="20" y2="26" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" style={{color:'var(--fg)'}}/>
+          <line x1="10" y1="12" x2="36" y2="12" stroke="#2DD4A5" strokeOpacity="0.15" strokeWidth="1"/>
+          <line x1="10" y1="34" x2="36" y2="34" stroke="#2DD4A5" strokeOpacity="0.15" strokeWidth="1"/>
+          <circle cx="23" cy="3"  r="3.5" fill="#2DD4A5"/>
+          <circle cx="37" cy="11" r="3"   fill="currentColor" opacity="0.55" style={{color:'var(--fg)'}}/>
+          <circle cx="37" cy="35" r="3"   fill="currentColor" opacity="0.55" style={{color:'var(--fg)'}}/>
+          <circle cx="23" cy="43" r="3.5" fill="#2DD4A5"/>
+          <circle cx="9"  cy="11" r="3"   fill="currentColor" opacity="0.55" style={{color:'var(--fg)'}}/>
+          <circle cx="9"  cy="35" r="3"   fill="currentColor" opacity="0.55" style={{color:'var(--fg)'}}/>
+          <circle cx="23" cy="23" r="7"   fill="#2DD4A5"/>
+          <circle cx="23" cy="23" r="3.5" style={{fill:'var(--ink-inner)'}}/>
+        </svg>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LOADING / FORBIDDEN
+    ═══════════════════════════════════════════════════════ */
+    function LoadingScreen() {
+      return (
+        <div style={{minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{width:'40px',height:'40px',border:'3px solid var(--border)',borderTopColor:'#2DD4A5',borderRadius:'50%',animation:'spin 1s linear infinite'}} />
+        </div>
+      );
+    }
+
+    function ForbiddenScreen({ lang = 'en' }) {
+      const t = T[lang];
+      return (
+        <div className="grid-bg min-h-screen flex flex-col items-center justify-center px-4 text-center" style={{background:'var(--bg)'}}>
+          <NqshMark size={48} />
+          <h1 className="font-display font-normal mt-8 mb-3"
+            style={{fontSize:'clamp(1.75rem,4vw,2.5rem)',lineHeight:1.1,letterSpacing:'-0.02em',color:'var(--fg)'}}>
+            {t.forbiddenTitle} <em style={{color:'#2DD4A5',fontStyle:'italic'}}>{t.forbiddenAccent}</em>
+          </h1>
+          <p className="text-sm mb-8 max-w-xs" style={{color:'var(--fg-lo)'}}>
+            {t.forbiddenMsg}
+          </p>
+          <a href="standalone.html" className="inline-flex items-center gap-2 font-semibold text-sm px-6 py-3 rounded-xl"
+            style={{background:'#2DD4A5',color:'#071E1B'}}>
+            {t.forbiddenBtn}
+          </a>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SHARED STYLE OBJECTS  (use CSS vars)
+    ═══════════════════════════════════════════════════════ */
+    const inputStyle = {
+      width:'100%', background:'var(--surface)',
+      border:'1px solid var(--border)', borderRadius:'10px',
+      padding:'10px 12px', color:'var(--fg)', fontSize:'13px',
+      fontFamily:"'ThmanyahSans', system-ui, sans-serif", outline:'none',
+    };
+    const selectStyle = {
+      ...inputStyle, cursor:'pointer', backgroundColor:'var(--select-bg)',
+    };
+    const labelStyle = {
+      display:'block', fontSize:'11px', fontFamily:"'DM Mono',monospace",
+      letterSpacing:'0.12em', textTransform:'uppercase',
+      color:'var(--fg-vl)', marginBottom:'6px',
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       HEADER BUTTONS
+    ═══════════════════════════════════════════════════════ */
+    function LangBtn({ lang, setLang }) {
+      return (
+        <button onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+          className="font-mono text-xs px-2.5 py-1 rounded-lg flex-shrink-0"
+          style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border-sm)',cursor:'pointer',transition:'all .15s',letterSpacing:'0.05em'}}
+          onMouseEnter={e=>{e.currentTarget.style.color='var(--fg)';e.currentTarget.style.borderColor='var(--border)';}}
+          onMouseLeave={e=>{e.currentTarget.style.color='var(--fg-lo)';e.currentTarget.style.borderColor='var(--border-sm)';}}>
+          {lang === 'en' ? 'ع' : 'EN'}
+        </button>
+      );
+    }
+
+    function ThemeBtn({ theme, setTheme }) {
+      const isDark = theme === 'dark';
+      return (
+        <button onClick={() => setTheme(isDark ? 'light' : 'dark')}
+          className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
+          title={isDark ? 'Switch to light mode' : 'Switch to night mode'}
+          style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border-sm)',cursor:'pointer',transition:'all .15s'}}
+          onMouseEnter={e=>{e.currentTarget.style.color='var(--fg)';e.currentTarget.style.borderColor='var(--border)';}}
+          onMouseLeave={e=>{e.currentTarget.style.color='var(--fg-lo)';e.currentTarget.style.borderColor='var(--border-sm)';}}>
+          {isDark ? (
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          ) : (
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+            </svg>
+          )}
+        </button>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ADMIN HEADER
+    ═══════════════════════════════════════════════════════ */
+    function AdminHeader({ user, tab, setTab, onSignOut, lang, setLang, theme, setTheme }) {
+      const t = T[lang];
+      const tabs = [
+        ['projects',  t.tabs.projects],
+        ['users',     t.tabs.users],
+        ['annotator', t.tabs.annotator],
+        ['client',    t.tabs.client],
+      ];
+      return (
+        <header className="sticky top-0 z-50"
+          style={{background:'var(--header-bg)',backdropFilter:'blur(12px)',borderBottom:'1px solid var(--header-border)'}}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16 gap-4">
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <a href="standalone.html" className="flex items-center gap-2">
+                  <NqshMark size={24} />
+                  <span className="text-base font-sans leading-none">
+                    <span className="font-extrabold" style={{color:'var(--fg)'}}>Nqsh</span>
+                    <span className="font-normal" style={{color:'var(--teal-link)'}}>Lab</span>
+                  </span>
+                </a>
+                <span className="font-mono text-xs px-2 py-0.5 rounded"
+                  style={{color:'#FF503C',background:'rgba(255,80,60,0.08)',border:'1px solid rgba(255,80,60,0.2)',letterSpacing:'0.1em'}}>
+                  {t.adminBadge}
+                </span>
+              </div>
+
+              <nav className="flex items-center gap-1 flex-1 justify-center">
+                {tabs.map(([key, label]) => (
+                  <button key={key} onClick={() => setTab(key)}
+                    className="font-mono text-xs px-3 py-2 rounded-lg whitespace-nowrap"
+                    style={{
+                      background: tab === key ? 'rgba(45,212,165,0.1)' : 'transparent',
+                      color: tab === key ? '#2DD4A5' : 'var(--fg-vl)',
+                      border: tab === key ? '1px solid rgba(45,212,165,0.25)' : '1px solid transparent',
+                      cursor:'pointer', transition:'all .15s', letterSpacing:'0.08em', textTransform:'uppercase',
+                    }}>
+                    {label}
+                  </button>
+                ))}
+              </nav>
+
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <ThemeBtn theme={theme} setTheme={setTheme} />
+                <LangBtn lang={lang} setLang={setLang} />
+                <span className="hidden md:block text-sm font-sans" style={{color:'var(--fg-lo)'}}>
+                  {user.name || user.email}
+                </span>
+                <button onClick={onSignOut}
+                  className="font-semibold text-sm px-4 py-2 rounded-xl"
+                  style={{background:'rgba(255,80,60,0.08)',color:'#FF503C',border:'1px solid rgba(255,80,60,0.18)',cursor:'pointer',transition:'opacity .15s'}}
+                  onMouseEnter={e=>e.currentTarget.style.opacity='0.75'}
+                  onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                  {t.signOut}
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       USER FORM
+    ═══════════════════════════════════════════════════════ */
+    function UserForm({ user, onSave, onClose, lang }) {
+      const t = T[lang];
+      const savedField  = user.field  || '';
+      const savedDegree = user.degree || '';
+      const knownField  = EXPERTISE_FIELDS.includes(savedField);
+      const knownDegree = DEGREE_LEVELS.includes(savedDegree);
+      const [form, setForm] = useState({
+        name: user.name || '',
+        role: user.role || 'annotator',
+        field:       knownField  ? savedField  : (savedField  ? EXPERTISE_FIELDS[EXPERTISE_FIELDS.length-1] : ''),
+        fieldOther:  knownField  ? ''          : savedField,
+        degree:      knownDegree ? savedDegree : (savedDegree ? DEGREE_LEVELS[DEGREE_LEVELS.length-1]       : ''),
+        degreeOther: knownDegree ? ''          : savedDegree,
+      });
+      const set = (k, v) => setForm(f => ({...f, [k]: v}));
+
+      const focusBorder = 'rgba(45,212,165,0.5)';
+      const blurBorder  = 'var(--border)';
+
+      return (
+        <div className="overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+          <div className="w-full max-w-md rounded-2xl p-6 md:p-8 overflow-y-auto"
+            style={{background:'var(--modal-bg)',border:'1px solid var(--modal-border)',maxHeight:'90vh'}}>
+
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display font-normal" style={{fontSize:'1.35rem',letterSpacing:'-0.02em',color:'var(--fg)'}}>
+                {t.editUser} <em style={{color:'#2DD4A5',fontStyle:'italic'}}>{t.editUserAccent}</em>
+              </h2>
+              <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',color:'var(--fg-vl)',fontSize:'20px',lineHeight:1}}>×</button>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <label style={labelStyle}>{t.emailLbl}</label>
+                <input style={{...inputStyle,opacity:0.5,cursor:'default'}} value={user.email} readOnly />
+              </div>
+              <div>
+                <label style={labelStyle}>{t.displayName}</label>
+                <input style={inputStyle} value={form.name} onChange={e=>set('name',e.target.value)}
+                  onFocus={e=>e.target.style.borderColor=focusBorder}
+                  onBlur={e=>e.target.style.borderColor=blurBorder} />
+              </div>
+              <div>
+                <label style={labelStyle}>{t.roleLbl}</label>
+                <select style={selectStyle} value={form.role} onChange={e=>set('role',e.target.value)}>
+                  <option value="annotator">{t.roles.annotator}</option>
+                  <option value="client">{t.roles.client}</option>
+                  <option value="admin">{t.roles.admin}</option>
+                </select>
+              </div>
+              {form.role === 'annotator' && (<>
+                <div>
+                  <label style={labelStyle}>{t.fieldOfExpertise}</label>
+                  <select style={selectStyle} value={form.field} onChange={e=>setForm(f=>({...f,field:e.target.value,fieldOther:''}))}>
+                    <option value="">{t.noneOpt}</option>
+                    {EXPERTISE_FIELDS.map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                  {form.field === EXPERTISE_FIELDS[EXPERTISE_FIELDS.length-1] && (
+                    <input placeholder={t.specifyField} value={form.fieldOther}
+                      onChange={e=>set('fieldOther',e.target.value)}
+                      style={{...inputStyle,marginTop:'8px'}}
+                      onFocus={e=>e.target.style.borderColor=focusBorder}
+                      onBlur={e=>e.target.style.borderColor=blurBorder} />
+                  )}
+                </div>
+                <div>
+                  <label style={labelStyle}>{t.degreeQual}</label>
+                  <select style={selectStyle} value={form.degree} onChange={e=>setForm(f=>({...f,degree:e.target.value,degreeOther:''}))}>
+                    <option value="">{t.noneOpt}</option>
+                    {DEGREE_LEVELS.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  {form.degree === DEGREE_LEVELS[DEGREE_LEVELS.length-1] && (
+                    <input placeholder={t.specifyDegree} value={form.degreeOther}
+                      onChange={e=>set('degreeOther',e.target.value)}
+                      style={{...inputStyle,marginTop:'8px'}}
+                      onFocus={e=>e.target.style.borderColor=focusBorder}
+                      onBlur={e=>e.target.style.borderColor=blurBorder} />
+                  )}
+                </div>
+              </>)}
+            </div>
+
+            <div className="flex gap-3 mt-7">
+              <button onClick={onClose}
+                className="flex-1 font-semibold text-sm py-3 rounded-xl"
+                style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border)',cursor:'pointer'}}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.75'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                {t.cancel}
+              </button>
+              <button onClick={() => {
+                if (!form.name.trim()) return;
+                const isOtherField  = form.field  === EXPERTISE_FIELDS[EXPERTISE_FIELDS.length-1];
+                const isOtherDegree = form.degree === DEGREE_LEVELS[DEGREE_LEVELS.length-1];
+                onSave({...user, ...form,
+                  field:  isOtherField  ? form.fieldOther.trim()  : form.field,
+                  degree: isOtherDegree ? form.degreeOther.trim() : form.degree,
+                });
+              }}
+                className="flex-1 font-semibold text-sm py-3 rounded-xl"
+                style={{background:'#2DD4A5',color:'#071E1B',border:'none',cursor:'pointer'}}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                {t.saveChanges}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PROJECT FORM
+    ═══════════════════════════════════════════════════════ */
+    function ProjectForm({ initial, users, onSave, onClose, lang }) {
+      const t = T[lang];
+      const clients    = users.filter(u => u.role === 'client');
+      const annotators = users.filter(u => u.role === 'annotator');
+      const blank = {
+        title:'', domain:'Healthcare', type:'classification', description:'',
+        status:'scoping', totalItems:'', estimatedDelivery:'', rewardUSD:'',
+        clientId:'', annotatorIds:[], requiredField:'Any field',
+      };
+      const [form, setForm] = useState(initial || blank);
+      const [quickDegree, setQuickDegree] = useState('');
+      const set = (k, v) => setForm(f => ({...f, [k]: v}));
+
+      const autoAssign = () => {
+        if (!quickDegree) return;
+        const req = form.requiredField && form.requiredField !== 'Any field';
+        const matched = annotators
+          .filter(a => a.degree === quickDegree)
+          .filter(a => !req || a.field === form.requiredField)
+          .map(a => a.uid);
+        setForm(f => ({...f, annotatorIds: matched}));
+      };
+
+      const toggleAnnotator = (uid) => {
+        setForm(f => ({
+          ...f,
+          annotatorIds: f.annotatorIds.includes(uid)
+            ? f.annotatorIds.filter(id => id !== uid)
+            : [...f.annotatorIds, uid],
+        }));
+      };
+
+      const handleSave = () => {
+        if (!form.title.trim()) return;
+        onSave({
+          ...form,
+          id: initial?.id || genId(),
+          totalItems: parseInt(form.totalItems) || 0,
+          completedItems: initial?.completedItems || 0,
+          rewardUSD: parseFloat(form.rewardUSD) || 0,
+        });
+      };
+
+      const req = form.requiredField && form.requiredField !== 'Any field';
+      const focusBorder = 'rgba(45,212,165,0.5)';
+      const blurBorder  = 'var(--border)';
+
+      return (
+        <div className="overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+          <div className="w-full max-w-xl rounded-2xl p-6 md:p-8 overflow-y-auto"
+            style={{background:'var(--modal-bg)',border:'1px solid var(--modal-border)',maxHeight:'90vh'}}>
+
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display font-normal" style={{fontSize:'1.35rem',letterSpacing:'-0.02em',color:'var(--fg)'}}>
+                {initial ? t.editProjectHead : <>{t.newProjectHead} <em style={{color:'#2DD4A5',fontStyle:'italic'}}>{t.newProjectAccent}</em></>}
+              </h2>
+              <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',color:'var(--fg-vl)',fontSize:'20px',lineHeight:1}}>×</button>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <label style={labelStyle}>{t.titleLbl}</label>
+                <input style={inputStyle} value={form.title} placeholder={t.titlePh}
+                  onChange={e=>set('title',e.target.value)}
+                  onFocus={e=>e.target.style.borderColor=focusBorder}
+                  onBlur={e=>e.target.style.borderColor=blurBorder} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label style={labelStyle}>{t.domainLbl}</label>
+                  <select style={selectStyle} value={form.domain} onChange={e=>set('domain',e.target.value)}>
+                    {DOMAINS.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>{t.taskTypeLbl}</label>
+                  <select style={selectStyle} value={form.type} onChange={e=>set('type',e.target.value)}>
+                    {TASK_TYPES.map(tp => <option key={tp} value={tp} style={{textTransform:'capitalize'}}>{tp}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>{t.reqExpertise}</label>
+                <select style={selectStyle} value={form.requiredField || 'Any field'} onChange={e=>set('requiredField',e.target.value)}>
+                  {REQUIRED_FIELDS.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>{t.descLbl}</label>
+                <textarea style={{...inputStyle,resize:'vertical',minHeight:'72px'}} value={form.description}
+                  placeholder={t.descPh}
+                  onChange={e=>set('description',e.target.value)}
+                  onFocus={e=>e.target.style.borderColor=focusBorder}
+                  onBlur={e=>e.target.style.borderColor=blurBorder} />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label style={labelStyle}>{t.statusLbl}</label>
+                  <select style={selectStyle} value={form.status} onChange={e=>set('status',e.target.value)}>
+                    {STATUSES.map(s => <option key={s} value={s}>{T[lang].statuses[s]}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>{t.totalItemsLbl}</label>
+                  <input style={inputStyle} type="number" min="0" value={form.totalItems} placeholder="0"
+                    onChange={e=>set('totalItems',e.target.value)}
+                    onFocus={e=>e.target.style.borderColor=focusBorder}
+                    onBlur={e=>e.target.style.borderColor=blurBorder} />
+                </div>
+                <div>
+                  <label style={labelStyle}>{t.budgetLbl}</label>
+                  <input style={inputStyle} type="number" min="0" step="0.01" value={form.rewardUSD} placeholder="0.00"
+                    onChange={e=>set('rewardUSD',e.target.value)}
+                    onFocus={e=>e.target.style.borderColor=focusBorder}
+                    onBlur={e=>e.target.style.borderColor=blurBorder} />
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>{t.estDeliveryLbl}</label>
+                <input style={inputStyle} type="date" value={form.estimatedDelivery}
+                  onChange={e=>set('estimatedDelivery',e.target.value)}
+                  onFocus={e=>e.target.style.borderColor=focusBorder}
+                  onBlur={e=>e.target.style.borderColor=blurBorder} />
+              </div>
+              <div>
+                <label style={labelStyle}>{t.assignClient}</label>
+                <select style={selectStyle} value={form.clientId} onChange={e=>set('clientId',e.target.value)}>
+                  <option value="">{t.noClientOpt}</option>
+                  {clients.map(c => <option key={c.uid} value={c.uid}>{c.name} ({c.email})</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>{t.assignAnnotators}</label>
+                <div className="flex gap-2 mb-3 p-3 rounded-xl" style={{background:'rgba(45,212,165,0.04)',border:'1px solid rgba(45,212,165,0.12)'}}>
+                  <select value={quickDegree} onChange={e=>setQuickDegree(e.target.value)}
+                    style={{...selectStyle, flex:1, padding:'8px 10px', fontSize:'12px', marginBottom:0}}>
+                    <option value="">{t.selectDegreeAuto}</option>
+                    {DEGREE_LEVELS.map(d => {
+                      const count = annotators
+                        .filter(a => a.degree === d)
+                        .filter(a => !req || a.field === form.requiredField).length;
+                      return <option key={d} value={d}>{d} ({t.annotatorCount(count)})</option>;
+                    })}
+                  </select>
+                  <button type="button" onClick={autoAssign} disabled={!quickDegree}
+                    className="font-semibold text-xs px-4 rounded-xl flex-shrink-0"
+                    style={{
+                      background: quickDegree ? '#2DD4A5' : 'var(--surface)',
+                      color: quickDegree ? '#071E1B' : 'var(--fg-ul)',
+                      border:'none', cursor: quickDegree ? 'pointer' : 'default', transition:'all .15s',
+                    }}>
+                    {t.autoSelect}
+                  </button>
+                </div>
+                <p className="font-mono text-xs mb-2" style={{color:'var(--fg-ul)'}}>
+                  {t.selectedCount(form.annotatorIds.length)}
+                  {req && ` · ${t.matchesField(form.requiredField)}`}
+                </p>
+                <div className="flex flex-col gap-2">
+                  {annotators.map(a => {
+                    const checked = form.annotatorIds.includes(a.uid);
+                    const matches = !req || a.field === form.requiredField;
+                    return (
+                      <button key={a.uid} type="button" onClick={() => toggleAnnotator(a.uid)}
+                        className="flex items-center gap-3 p-3 rounded-xl text-left"
+                        style={{
+                          background: checked ? 'rgba(45,212,165,0.08)' : 'var(--surface)',
+                          border:`1px solid ${checked ? 'rgba(45,212,165,0.35)' : matches ? 'rgba(45,212,165,0.12)' : 'var(--border)'}`,
+                          cursor:'pointer', transition:'all .15s',
+                          opacity: req && !matches ? 0.4 : 1,
+                        }}>
+                        <span style={{
+                          width:'14px', height:'14px', borderRadius:'3px', flexShrink:0,
+                          border:`2px solid ${checked ? '#2DD4A5' : 'var(--border-hi)'}`,
+                          background: checked ? '#2DD4A5' : 'transparent',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                        }}>
+                          {checked && <svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="#071E1B" strokeWidth={3.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
+                        </span>
+                        <div style={{flex:1,minWidth:0}}>
+                          <p className="text-sm font-medium" style={{color: checked ? 'var(--fg)' : 'var(--fg-md)'}}>
+                            {matches && req && <span style={{color:'#2DD4A5',marginRight:'4px'}}>★</span>}
+                            {a.name}
+                          </p>
+                          <p className="font-mono text-xs" style={{color:'var(--fg-ul)'}}>
+                            {[a.degree, a.field].filter(Boolean).join(' · ')} · {a.email}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-7">
+              <button onClick={onClose}
+                className="flex-1 font-semibold text-sm py-3 rounded-xl"
+                style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border)',cursor:'pointer'}}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.75'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                {t.cancel}
+              </button>
+              <button onClick={handleSave}
+                className="flex-1 font-semibold text-sm py-3 rounded-xl"
+                style={{background:'#2DD4A5',color:'#071E1B',border:'none',cursor:'pointer'}}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                {initial ? t.saveChanges : t.createProject}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CONFIRM DELETE
+    ═══════════════════════════════════════════════════════ */
+    function ConfirmDelete({ title, onConfirm, onClose, lang }) {
+      const t = T[lang];
+      return (
+        <div className="overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+          <div className="w-full max-w-sm rounded-2xl p-7 text-center"
+            style={{background:'var(--modal-bg)',border:'1px solid rgba(255,80,60,0.25)'}}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{background:'rgba(255,80,60,0.1)',border:'1px solid rgba(255,80,60,0.2)'}}>
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#FF503C" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="font-semibold text-base mb-2" style={{color:'var(--fg)'}}>{t.deleteProjectTitle}</h3>
+            <p className="text-sm mb-6" style={{color:'var(--fg-lo)'}}>
+              <strong style={{color:'var(--fg)'}}>{title}</strong> {lang === 'ar' ? 'سيُحذف نهائياً.' : 'will be permanently removed.'}
+            </p>
+            <div className="flex gap-3">
+              <button onClick={onClose}
+                className="flex-1 font-semibold text-sm py-2.5 rounded-xl"
+                style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border)',cursor:'pointer'}}>
+                {t.cancel}
+              </button>
+              <button onClick={onConfirm}
+                className="flex-1 font-semibold text-sm py-2.5 rounded-xl"
+                style={{background:'rgba(255,80,60,0.12)',color:'#FF503C',border:'1px solid rgba(255,80,60,0.25)',cursor:'pointer'}}>
+                {t.delete}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PROJECTS TAB
+    ═══════════════════════════════════════════════════════ */
+    function ProjectsTab({ projects, users, onAdd, onEdit, onDelete, lang }) {
+      const t = T[lang];
+      const getUser = uid => users.find(u => u.uid === uid);
+
+      return (
+        <div className="fade-in">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="font-display font-normal" style={{fontSize:'1.5rem',letterSpacing:'-0.02em',color:'var(--fg)'}}>{t.projectsTitle}</h2>
+              <p className="text-sm mt-0.5" style={{color:'var(--fg-lo)'}}>
+                {t.projectsCount(projects.length, projects.filter(p=>p.status==='in_progress').length)}
+              </p>
+            </div>
+            <button onClick={onAdd}
+              className="inline-flex items-center gap-2 font-semibold text-sm px-5 py-2.5 rounded-xl"
+              style={{background:'#2DD4A5',color:'#071E1B',border:'none',cursor:'pointer',transition:'opacity .15s'}}
+              onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+              onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+              {t.newProjectBtn}
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {projects.map(proj => {
+              const sc     = STATUS_COLOR[proj.status] || STATUS_COLOR.scoping;
+              const client = getUser(proj.clientId);
+              const annots = proj.annotatorIds.map(id => getUser(id)).filter(Boolean);
+              const pct    = proj.totalItems > 0 ? Math.round((proj.completedItems/proj.totalItems)*100) : 0;
+              return (
+                <div key={proj.id} className="glass rounded-2xl p-5 md:p-6">
+                  <div className="flex flex-col md:flex-row md:items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="font-mono text-xs px-2.5 py-0.5 rounded-full"
+                          style={{background:'rgba(45,212,165,0.08)',color:'#2DD4A5',border:'1px solid rgba(45,212,165,0.2)'}}>
+                          {proj.domain}
+                        </span>
+                        <span className="font-mono text-xs px-2.5 py-0.5 rounded-full"
+                          style={{background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>
+                          {t.statuses[proj.status]}
+                        </span>
+                        <span className="font-mono text-xs" style={{color:'var(--fg-ul)',letterSpacing:'0.08em',textTransform:'uppercase'}}>
+                          {proj.type}
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-base mb-1" style={{color:'var(--fg)'}}>{proj.title}</h3>
+                      <p className="text-xs mb-3" style={{color:'var(--fg-lo)',display:'-webkit-box',WebkitLineClamp:1,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+                        {proj.description}
+                      </p>
+                      <div className="flex flex-wrap gap-4 text-xs font-mono">
+                        <span style={{color:'var(--fg-vl)'}}>
+                          {t.clientLbl}: <span style={{color:client?'var(--fg)':'var(--fg-ul)'}}>{client?client.name:t.unassigned}</span>
+                        </span>
+                        {proj.requiredField && proj.requiredField !== 'Any field' && (
+                          <span style={{color:'var(--fg-vl)'}}>
+                            {t.requiresLbl}: <span style={{color:'#2DD4A5'}}>{proj.requiredField}</span>
+                          </span>
+                        )}
+                        <span style={{color:'var(--fg-vl)'}}>
+                          {t.annotatorsLbl}: <span style={{color:annots.length?'var(--fg)':'var(--fg-ul)'}}>
+                            {annots.length ? annots.map(a=>`${a.name.split(' ')[0]} (${a.degree} ${a.field})`).join(', ') : t.noneAnnotators}
+                          </span>
+                        </span>
+                        {proj.totalItems > 0 && <span style={{color:'var(--fg-vl)'}}>{t.progressLbl}: <span style={{color:'#2DD4A5'}}>{pct}%</span></span>}
+                        {proj.rewardUSD > 0 && <span style={{color:'var(--fg-vl)'}}>{t.budgetCol}: <span style={{color:'var(--fg)'}}>${proj.rewardUSD.toLocaleString()}</span></span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button onClick={()=>onEdit(proj)}
+                        className="font-semibold text-xs px-4 py-2 rounded-lg"
+                        style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border)',cursor:'pointer',transition:'all .15s'}}
+                        onMouseEnter={e=>{e.currentTarget.style.background='rgba(45,212,165,0.1)';e.currentTarget.style.color='#2DD4A5';}}
+                        onMouseLeave={e=>{e.currentTarget.style.background='var(--surface)';e.currentTarget.style.color='var(--fg-lo)';}}>
+                        {t.editBtn}
+                      </button>
+                      <button onClick={()=>onDelete(proj)}
+                        className="font-semibold text-xs px-4 py-2 rounded-lg"
+                        style={{background:'rgba(255,80,60,0.07)',color:'#FF503C',border:'1px solid rgba(255,80,60,0.18)',cursor:'pointer',transition:'opacity .15s'}}
+                        onMouseEnter={e=>e.currentTarget.style.opacity='0.7'}
+                        onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                        {t.deleteBtn}
+                      </button>
+                    </div>
+                  </div>
+                  {proj.totalItems > 0 && (
+                    <div className="mt-4 rounded-full overflow-hidden" style={{height:'3px',background:'var(--surface-hi)'}}>
+                      <div style={{height:'100%',width:`${pct}%`,background:'rgba(45,212,165,0.6)',borderRadius:'2px',transition:'width 0.3s'}} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {projects.length === 0 && (
+              <div className="glass rounded-2xl p-12 text-center">
+                <p className="font-mono text-sm" style={{color:'var(--fg-ul)'}}>{t.noProjects}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       USERS TAB
+    ═══════════════════════════════════════════════════════ */
+    function UsersTab({ users, projects, onEditUser, lang }) {
+      const t = T[lang];
+      const [fieldFilter,  setFieldFilter]  = useState('All');
+      const [degreeFilter, setDegreeFilter] = useState('All');
+
+      const clients       = users.filter(u => u.role === 'client');
+      const allAnnotators = users.filter(u => u.role === 'annotator');
+      const annotators    = allAnnotators
+        .filter(u => fieldFilter  === 'All' || u.field  === fieldFilter)
+        .filter(u => degreeFilter === 'All' || u.degree === degreeFilter);
+
+      const uniqueFields = [...new Set(allAnnotators.map(u=>u.field).filter(Boolean))].sort();
+      const projectsFor  = uid => projects.filter(p => p.clientId === uid || p.annotatorIds.includes(uid));
+
+      const smBtn = {
+        fontFamily:"'ThmanyahSans',system-ui,sans-serif", fontWeight:600, fontSize:'11px',
+        padding:'4px 10px', borderRadius:'8px', cursor:'pointer', transition:'all .15s',
+      };
+
+      return (
+        <div className="fade-in">
+          <div className="mb-6">
+            <h2 className="font-display font-normal" style={{fontSize:'1.5rem',letterSpacing:'-0.02em',color:'var(--fg)'}}>{t.usersTitle}</h2>
+            <p className="text-sm mt-0.5" style={{color:'var(--fg-lo)'}}>
+              {t.usersCount(clients.length, allAnnotators.length)}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <div className="mono-label">{t.clientsSection}</div>
+              <div className="flex flex-col gap-3">
+                {clients.map(u => (
+                  <div key={u.uid} className="glass rounded-xl p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-semibold text-sm" style={{color:'var(--fg)'}}>{u.name}</p>
+                        <p className="font-mono text-xs mb-2" style={{color:'var(--fg-vl)'}}>{u.email}</p>
+                      </div>
+                      <button onClick={()=>onEditUser(u)}
+                        style={{...smBtn,background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border)'}}
+                        onMouseEnter={e=>{e.currentTarget.style.background='rgba(45,212,165,0.08)';e.currentTarget.style.color='#2DD4A5';}}
+                        onMouseLeave={e=>{e.currentTarget.style.background='var(--surface)';e.currentTarget.style.color='var(--fg-lo)';}}>
+                        {t.editBtn}
+                      </button>
+                    </div>
+                    {projectsFor(u.uid).length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {projectsFor(u.uid).map(p => {
+                          const sc = STATUS_COLOR[p.status];
+                          return (
+                            <span key={p.id} className="font-mono text-xs px-2 py-0.5 rounded-full"
+                              style={{background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>
+                              {p.title.length>22?p.title.slice(0,22)+'…':p.title}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="font-mono text-xs mt-1" style={{color:'var(--fg-ul)'}}>{t.noProjectsAssigned}</p>
+                    )}
+                  </div>
+                ))}
+                {clients.length === 0 && <p className="font-mono text-xs" style={{color:'var(--fg-ul)'}}>{t.noClients}</p>}
+              </div>
+            </div>
+
+            <div>
+              <div className="mono-label">{t.annotatorsSection}</div>
+              <div className="flex gap-2 mb-4">
+                <select value={fieldFilter} onChange={e=>setFieldFilter(e.target.value)}
+                  style={{...selectStyle,flex:1,padding:'7px 10px',fontSize:'12px'}}>
+                  <option value="All">{t.allFields}</option>
+                  {uniqueFields.map(f=><option key={f} value={f}>{f}</option>)}
+                </select>
+                <select value={degreeFilter} onChange={e=>setDegreeFilter(e.target.value)}
+                  style={{...selectStyle,flex:1,padding:'7px 10px',fontSize:'12px'}}>
+                  <option value="All">{t.allDegrees}</option>
+                  {DEGREE_LEVELS.map(d=><option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+              {(fieldFilter !== 'All' || degreeFilter !== 'All') && (
+                <p className="font-mono text-xs mb-3" style={{color:'var(--fg-vl)'}}>
+                  {t.shownOf(annotators.length, allAnnotators.length)}
+                </p>
+              )}
+              <div className="flex flex-col gap-3">
+                {annotators.map(u => (
+                  <div key={u.uid} className="glass rounded-xl p-4">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm" style={{color:'var(--fg)'}}>{u.name}</p>
+                        <p className="font-mono text-xs" style={{color:'var(--fg-vl)'}}>{u.email}</p>
+                      </div>
+                      {u.field && (
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <span className="font-mono text-xs px-2 py-0.5 rounded-full"
+                            style={{background:'rgba(45,212,165,0.08)',color:'#2DD4A5',border:'1px solid rgba(45,212,165,0.2)'}}>
+                            {u.field}
+                          </span>
+                          {u.degree && (
+                            <span className="font-mono text-xs px-2 py-0.5 rounded-full"
+                              style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border)'}}>
+                              {u.degree}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2 mb-2">
+                      <button onClick={()=>onEditUser(u)}
+                        style={{...smBtn,background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border)'}}
+                        onMouseEnter={e=>{e.currentTarget.style.background='rgba(45,212,165,0.08)';e.currentTarget.style.color='#2DD4A5';}}
+                        onMouseLeave={e=>{e.currentTarget.style.background='var(--surface)';e.currentTarget.style.color='var(--fg-lo)';}}>
+                        {t.editBtn}
+                      </button>
+                    </div>
+                    {projectsFor(u.uid).length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {projectsFor(u.uid).map(p => {
+                          const sc = STATUS_COLOR[p.status];
+                          return (
+                            <span key={p.id} className="font-mono text-xs px-2 py-0.5 rounded-full"
+                              style={{background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>
+                              {p.title.length>22?p.title.slice(0,22)+'…':p.title}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="font-mono text-xs mt-1" style={{color:'var(--fg-ul)'}}>{t.notAssigned}</p>
+                    )}
+                  </div>
+                ))}
+                {annotators.length === 0 && (
+                  <div className="glass rounded-xl p-6 text-center">
+                    <p className="font-mono text-xs" style={{color:'var(--fg-ul)'}}>
+                      {allAnnotators.length === 0 ? t.noAnnotators : t.noAnnotatorsFilter}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CLIENT VIEW
+    ═══════════════════════════════════════════════════════ */
+    function ClientView({ projects, users, lang }) {
+      const t = T[lang];
+      const getUser = uid => users.find(u => u.uid === uid);
+      const [selected, setSelected] = useState(null);
+
+      const stats = [
+        { label: t.statsActive,    value: projects.filter(p=>p.status==='in_progress').length, color:'#fbbf24' },
+        { label: t.statsInReview,  value: projects.filter(p=>p.status==='in_review').length,   color:'#a78bfa' },
+        { label: t.statsDelivered, value: projects.filter(p=>p.status==='delivered').length,    color:'#2DD4A5' },
+        { label: t.statsBudget,    value:`$${projects.reduce((s,p)=>s+(p.rewardUSD||0),0).toLocaleString()}`, color:'var(--fg)' },
+      ];
+
+      return (
+        <div className="fade-in">
+          <div className="flex items-start justify-between mb-8">
+            <div>
+              <h2 className="font-display font-normal" style={{fontSize:'1.5rem',letterSpacing:'-0.02em',color:'var(--fg)'}}>
+                {t.clientViewTitle} <em style={{color:'#2DD4A5',fontStyle:'italic'}}>{t.clientViewAccent}</em>
+              </h2>
+              <p className="font-mono text-xs mt-1" style={{color:'var(--fg-vl)'}}>{t.clientViewDebug}</p>
+            </div>
+            <span className="font-mono text-xs px-3 py-1 rounded-full flex-shrink-0"
+              style={{background:'rgba(167,139,250,0.08)',color:'#a78bfa',border:'1px solid rgba(167,139,250,0.2)'}}>
+              {t.clientViewBadge}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {stats.map(s => (
+              <div key={s.label} className="glass rounded-2xl p-5 text-center">
+                <p className="font-mono text-xs mb-2 uppercase" style={{color:'var(--fg-vl)',letterSpacing:'0.1em'}}>{s.label}</p>
+                <p className="font-bold text-2xl leading-none" style={{color:s.color}}>{s.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {projects.map(proj => {
+              const sc     = STATUS_COLOR[proj.status] || STATUS_COLOR.scoping;
+              const client = getUser(proj.clientId);
+              const pct    = proj.totalItems > 0 ? Math.round((proj.completedItems/proj.totalItems)*100) : 0;
+              const isOpen = selected === proj.id;
+              return (
+                <div key={proj.id} className="glass rounded-2xl overflow-hidden">
+                  <button className="w-full text-left p-5 md:p-6"
+                    style={{background:'none',border:'none',cursor:'pointer'}}
+                    onClick={() => setSelected(isOpen ? null : proj.id)}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="font-mono text-xs px-2.5 py-0.5 rounded-full"
+                            style={{background:'rgba(45,212,165,0.08)',color:'#2DD4A5',border:'1px solid rgba(45,212,165,0.2)'}}>
+                            {proj.domain}
+                          </span>
+                          <span className="font-mono text-xs px-2.5 py-0.5 rounded-full"
+                            style={{background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>
+                            {t.statuses[proj.status]}
+                          </span>
+                        </div>
+                        <h3 className="font-semibold text-base" style={{color:'var(--fg)'}}>{proj.title}</h3>
+                        {proj.totalItems > 0 && (
+                          <p className="font-mono text-xs mt-1" style={{color:'var(--fg-vl)'}}>
+                            {proj.completedItems.toLocaleString()} / {proj.totalItems.toLocaleString()} · {pct}%
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        {proj.rewardUSD > 0 && (
+                          <span className="font-mono text-sm font-medium" style={{color:'#2DD4A5'}}>${proj.rewardUSD.toLocaleString()}</span>
+                        )}
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--fg-vl)" strokeWidth={2}
+                          style={{transform: isOpen ? 'rotate(180deg)' : 'none', transition:'transform .2s', flexShrink:0}}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                      </div>
+                    </div>
+                    {proj.totalItems > 0 && (
+                      <div className="mt-4 rounded-full overflow-hidden" style={{height:'3px',background:'var(--surface-hi)'}}>
+                        <div style={{height:'100%',width:`${pct}%`,background:'rgba(45,212,165,0.6)',borderRadius:'2px',transition:'width .3s'}} />
+                      </div>
+                    )}
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 md:px-6 pb-5 pt-0" style={{borderTop:'1px solid var(--border)'}}>
+                      <p className="text-sm mt-4 mb-4" style={{color:'var(--fg-lo)'}}>{proj.description}</p>
+                      <div className="flex flex-wrap gap-4 text-xs font-mono">
+                        <span style={{color:'var(--fg-vl)'}}>
+                          {t.clientLbl}: <span style={{color:client?'var(--fg)':'var(--fg-ul)'}}>{client?.name||'— none —'}</span>
+                        </span>
+                        {proj.startDate && <span style={{color:'var(--fg-vl)'}}>{t.started}: <span style={{color:'var(--fg)'}}>{proj.startDate}</span></span>}
+                        {proj.estimatedDelivery && <span style={{color:'var(--fg-vl)'}}>{t.estDelivery2}: <span style={{color:'var(--fg)'}}>{proj.estimatedDelivery}</span></span>}
+                        <span style={{color:'var(--fg-vl)'}}>{t.annotatorsLbl}: <span style={{color:'var(--fg)'}}>{proj.annotatorIds.length}</span></span>
+                        {proj.requiredField && proj.requiredField !== 'Any field' && (
+                          <span style={{color:'var(--fg-vl)'}}>{t.requiresLbl}: <span style={{color:'#2DD4A5'}}>{proj.requiredField}</span></span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {projects.length === 0 && (
+              <div className="glass rounded-2xl p-12 text-center">
+                <p className="font-mono text-sm" style={{color:'var(--fg-ul)'}}>{t.noProjectsYet}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ANNOTATOR VIEW
+    ═══════════════════════════════════════════════════════ */
+    function AnnotatorView({ adminUser, projects, lang }) {
+      const t = T[lang];
+      const uid    = adminUser.uid;
+      const field  = localStorage.getItem(`nqsh_field_${uid}`)  || '';
+      const degree = localStorage.getItem(`nqsh_degree_${uid}`) || '';
+
+      const assigned  = projects.filter(p => p.annotatorIds.includes(uid));
+      const active    = assigned.find(p => p.status === 'in_progress');
+      const available = projects.filter(p => {
+        if (p.annotatorIds.includes(uid)) return false;
+        if (p.status !== 'scoping' && p.status !== 'in_progress') return false;
+        return !p.requiredField || p.requiredField === 'Any field' || p.requiredField === field;
+      });
+
+      const earned    = assigned.filter(p=>p.status==='delivered').reduce((s,p)=>s+p.rewardUSD/Math.max(p.annotatorIds.length,1),0);
+      const pending   = assigned.filter(p=>p.status==='in_review' ).reduce((s,p)=>s+p.rewardUSD/Math.max(p.annotatorIds.length,1),0);
+      const completed = assigned.filter(p=>p.status==='delivered').length;
+      const noProfile = !field && !degree;
+
+      return (
+        <div className="fade-in">
+          <div className="flex items-start justify-between mb-8">
+            <div>
+              <h2 className="font-display font-normal" style={{fontSize:'1.5rem',letterSpacing:'-0.02em',color:'var(--fg)'}}>
+                {adminUser.name || adminUser.email}
+              </h2>
+              {(field || degree) ? (
+                <p className="font-mono text-sm mt-1" style={{color:'var(--fg-lo)'}}>
+                  {[degree, field].filter(Boolean).join(' · ')}
+                </p>
+              ) : (
+                <p className="font-mono text-xs mt-1" style={{color:'rgba(255,80,60,0.7)'}}>
+                  {t.noProfileMsg}
+                </p>
+              )}
+            </div>
+            <span className="font-mono text-xs px-3 py-1 rounded-full flex-shrink-0"
+              style={{background:'rgba(45,212,165,0.08)',color:'#2DD4A5',border:'1px solid rgba(45,212,165,0.2)'}}>
+              {t.annotatorViewBadge}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            {[
+              { label: t.earnedLbl,    value:`$${earned.toFixed(2)}`,  color:'#2DD4A5', glow:true  },
+              { label: t.pendingLbl,   value:`$${pending.toFixed(2)}`, color:'#fbbf24', glow:false },
+              { label: t.completedLbl, value: completed,               color:'var(--fg)', glow:false },
+            ].map(card => (
+              <div key={card.label} className="glass rounded-2xl p-5 text-center"
+                style={card.glow ? {boxShadow:'0 0 24px rgba(45,212,165,0.06)'} : {}}>
+                <p className="font-mono text-xs mb-2" style={{color:'var(--fg-vl)',letterSpacing:'0.1em',textTransform:'uppercase'}}>
+                  {card.label}
+                </p>
+                <p className="font-bold text-2xl leading-none" style={{color:card.color}}>{card.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-8">
+            <div className="mono-label">{t.activeProjectLbl}</div>
+            {active ? (
+              <div className="glass-teal rounded-2xl p-5">
+                <h3 className="font-semibold text-base mb-1" style={{color:'var(--fg)'}}>{active.title}</h3>
+                <p className="text-sm mb-4" style={{color:'var(--fg-lo)'}}>{active.description}</p>
+                <div className="rounded-full overflow-hidden mb-2" style={{height:'4px',background:'var(--surface-hi)'}}>
+                  <div style={{height:'100%',width:`${active.totalItems>0?Math.round((active.completedItems/active.totalItems)*100):0}%`,background:'rgba(45,212,165,0.7)',borderRadius:'4px'}} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="font-mono text-xs" style={{color:'var(--fg-vl)'}}>
+                    {active.completedItems}/{active.totalItems}
+                  </p>
+                  {active.rewardUSD > 0 && (
+                    <p className="font-mono text-xs" style={{color:'rgba(45,212,165,0.7)'}}>
+                      {t.expectedPay((active.rewardUSD/Math.max(active.annotatorIds.length,1)).toFixed(0))}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="glass rounded-2xl p-8 text-center">
+                <p className="font-mono text-sm" style={{color:'var(--fg-ul)'}}>{t.noActiveProject}</p>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="mono-label">{t.availableProjectsLbl}</div>
+            {available.length === 0 ? (
+              <div className="glass rounded-2xl p-8 text-center">
+                <p className="font-mono text-sm" style={{color:'var(--fg-ul)'}}>
+                  {noProfile ? t.noAvailableNoProfile : t.noAvailableField}
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {available.map(p => (
+                  <div key={p.id} className="glass rounded-2xl p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm mb-1" style={{color:'var(--fg)'}}>{p.title}</h4>
+                        <p className="text-xs" style={{color:'var(--fg-lo)'}}>{p.description}</p>
+                      </div>
+                      {p.rewardUSD > 0 && (
+                        <span className="font-mono text-base font-medium flex-shrink-0" style={{color:'#2DD4A5'}}>
+                          ${p.rewardUSD.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       APP
+    ═══════════════════════════════════════════════════════ */
+    function App() {
+      const [lang, setLang]   = useLang();
+      const [theme, setTheme] = useTheme();
+      const [authLoading,    setAuthLoading]    = useState(true);
+      const [user,           setUser]           = useState(null);
+      const [forbidden,      setForbidden]      = useState(false);
+      const [tab,            setTab]            = useState('projects');
+      const [projects,       setProjects]       = useState(INITIAL_PROJECTS);
+      const [users,          setUsers]          = useState(INITIAL_USERS);
+      const [showForm,       setShowForm]       = useState(false);
+      const [editTarget,     setEditTarget]     = useState(null);
+      const [deleteTarget,   setDeleteTarget]   = useState(null);
+      const [userEditTarget, setUserEditTarget] = useState(null);
+
+      useEffect(() => {
+        const unsub = auth.onAuthStateChanged(u => {
+          if (!u) { setForbidden(true); }
+          else {
+            const role = localStorage.getItem(`nqsh_role_${u.uid}`);
+            if (role !== 'admin') { setForbidden(true); }
+            else { setUser({ uid: u.uid, name: u.displayName, email: u.email }); }
+          }
+          setAuthLoading(false);
+        });
+        return () => unsub();
+      }, []);
+
+      const handleAdd  = useCallback(() => { setEditTarget(null); setShowForm(true); }, []);
+      const handleEdit = useCallback(proj => { setEditTarget(proj); setShowForm(true); }, []);
+
+      const handleSave = useCallback(proj => {
+        setProjects(ps => {
+          const idx = ps.findIndex(p => p.id === proj.id);
+          return idx >= 0 ? ps.map(p => p.id === proj.id ? proj : p) : [...ps, proj];
+        });
+        setShowForm(false); setEditTarget(null);
+      }, []);
+
+      const handleDeleteConfirm = useCallback(() => {
+        setProjects(ps => ps.filter(p => p.id !== deleteTarget.id));
+        setDeleteTarget(null);
+      }, [deleteTarget]);
+
+      const handleUserSave = useCallback(updated => {
+        setUsers(us => us.map(u => u.uid === updated.uid ? updated : u));
+        setUserEditTarget(null);
+      }, []);
+
+      const handleSignOut = useCallback(async () => {
+        await auth.signOut();
+        window.location.href = 'standalone.html';
+      }, []);
+
+      if (authLoading) return <LoadingScreen />;
+      if (forbidden)   return <ForbiddenScreen lang={lang} />;
+
+      return (
+        <div style={{minHeight:'100vh',background:'var(--bg)',color:'var(--fg)',fontFamily:"'ThmanyahSans', system-ui, sans-serif"}}>
+          <AdminHeader user={user} tab={tab} setTab={setTab} onSignOut={handleSignOut}
+            lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} />
+
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {tab === 'projects' && (
+              <ProjectsTab projects={projects} users={users} onAdd={handleAdd} onEdit={handleEdit} onDelete={setDeleteTarget} lang={lang} />
+            )}
+            {tab === 'users' && (
+              <UsersTab users={users} projects={projects} onEditUser={setUserEditTarget} lang={lang} />
+            )}
+            {tab === 'annotator' && (
+              <AnnotatorView adminUser={user} projects={projects} lang={lang} />
+            )}
+            {tab === 'client' && (
+              <ClientView projects={projects} users={users} lang={lang} />
+            )}
+          </main>
+
+          {showForm && (
+            <ProjectForm initial={editTarget} users={users} onSave={handleSave}
+              onClose={() => { setShowForm(false); setEditTarget(null); }} lang={lang} />
+          )}
+          {deleteTarget && (
+            <ConfirmDelete title={deleteTarget.title} onConfirm={handleDeleteConfirm} onClose={()=>setDeleteTarget(null)} lang={lang} />
+          )}
+          {userEditTarget && (
+            <UserForm user={userEditTarget} onSave={handleUserSave} onClose={()=>setUserEditTarget(null)} lang={lang} />
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

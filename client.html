@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NqshLab — Client Portal</title>
+  <meta name="description" content="NqshLab client dashboard." />
+
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:  { DEFAULT: '#071E1B', deep: '#050F0D' },
+            teal: { DEFAULT: '#2DD4A5', dim: '#1A8A6E'  },
+          },
+          fontFamily: {
+            sans:    ['ThmanyahSans', 'system-ui', 'sans-serif'],
+            display: ['ThmanyahSerifDisplay', 'Georgia', 'serif'],
+            mono:    ['"DM Mono"', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+    :root {
+      --ink:      #071E1B;
+      --teal:     #2DD4A5;
+      --border:   rgba(45,212,165,0.15);
+      --surface:  rgba(255,255,255,0.04);
+      --muted:    rgba(255,255,255,0.42);
+    }
+    html { scroll-behavior: smooth; background: var(--ink); }
+    body { background: var(--ink); color: #fff; -webkit-font-smoothing: antialiased; }
+
+    .glass      { background: var(--surface); border: 1px solid var(--border); }
+    .glass-teal { background: rgba(45,212,165,0.06); border: 1px solid rgba(45,212,165,0.22); }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .mono-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .mono-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    #root:empty::before { content:''; display:block; height:100vh; background:var(--ink); }
+
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes fadeIn  { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation: fadeIn 0.25s ease forwards; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+
+    /* ═══════════════════════════════════════════════════════
+       FIREBASE INITIALIZATION
+    ═══════════════════════════════════════════════════════ */
+    const firebaseConfig = {
+      apiKey: "AIzaSyACErx-oPDy-LHw1RkhNak1nwYuDbFOMBs",
+      authDomain: "nqshlab.firebaseapp.com",
+      projectId: "nqshlab",
+      storageBucket: "nqshlab.firebasestorage.app",
+      messagingSenderId: "19755138224",
+      appId: "1:19755138224:web:e75f9d694267cb32ac4f75",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+
+    /* ═══════════════════════════════════════════════════════
+       MOCK DATA  (swap with Firestore later)
+    ═══════════════════════════════════════════════════════ */
+
+    // TODO: replace with db.collection('projects').where('clientId','==', user.uid).get()
+    const MOCK_PROJECTS = [
+      {
+        id: 'proj-001',
+        title: 'Medical Record Classification',
+        domain: 'Healthcare',
+        description: 'Classify 2,400 de-identified patient notes into triage categories for an ER triage model.',
+        status: 'in_progress',
+        totalItems: 2400,
+        completedItems: 1380,
+        annotators: 4,
+        startDate: '2026-04-18',
+        estimatedDelivery: '2026-05-12',
+        spent: 1240.00,
+        qualityScore: 97.2,
+        recentActivity: '312 items annotated in the last 24 hours',
+      },
+      {
+        id: 'proj-002',
+        title: 'Contract Clause Labeling',
+        domain: 'Legal',
+        description: 'Label 800 contract clauses across 5 categories for a legal AI contract review product.',
+        status: 'in_review',
+        totalItems: 800,
+        completedItems: 800,
+        annotators: 3,
+        startDate: '2026-03-29',
+        estimatedDelivery: '2026-05-06',
+        spent: 980.00,
+        qualityScore: 95.8,
+        recentActivity: 'Awaiting your sign-off on final quality report',
+      },
+      {
+        id: 'proj-003',
+        title: 'LLM Preference Dataset',
+        domain: 'AI / LLMs',
+        description: 'Preference labeling of 1,200 prompt–response pairs for RLHF fine-tuning.',
+        status: 'delivered',
+        totalItems: 1200,
+        completedItems: 1200,
+        annotators: 5,
+        startDate: '2026-02-10',
+        estimatedDelivery: '2026-03-15',
+        spent: 1560.00,
+        qualityScore: 96.5,
+        recentActivity: 'Dataset delivered on 2026-03-14',
+      },
+      {
+        id: 'proj-004',
+        title: 'Financial News Sentiment',
+        domain: 'Finance',
+        description: 'Sentiment labels for 3,000 financial news headlines to train a market-signal classifier.',
+        status: 'scoping',
+        totalItems: 3000,
+        completedItems: 0,
+        annotators: 0,
+        startDate: null,
+        estimatedDelivery: null,
+        spent: 0,
+        qualityScore: null,
+        recentActivity: 'Awaiting scope confirmation from NqshLab team',
+      },
+    ];
+
+    // TODO: replace with db.collection('clients').doc(user.uid).get()
+    const MOCK_STATS = {
+      activeProjects: MOCK_PROJECTS.filter(p => p.status === 'in_progress').length,
+      inReview:       MOCK_PROJECTS.filter(p => p.status === 'in_review').length,
+      delivered:      MOCK_PROJECTS.filter(p => p.status === 'delivered').length,
+      totalSpent:     MOCK_PROJECTS.reduce((sum, p) => sum + p.spent, 0),
+    };
+
+
+    /* ═══════════════════════════════════════════════════════
+       ICONS
+    ═══════════════════════════════════════════════════════ */
+    function ArrowLeftIcon({ className = 'w-4 h-4' }) {
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+      );
+    }
+    function ArrowRightIcon({ className = 'w-4 h-4' }) {
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      );
+    }
+    function CalendarIcon({ className = 'w-3.5 h-3.5' }) {
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      );
+    }
+    function UsersIcon({ className = 'w-3.5 h-3.5' }) {
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      );
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       BRAND COMPONENTS
+    ═══════════════════════════════════════════════════════ */
+    function NqshMark({ size = 28 }) {
+      return (
+        <svg width={size} height={size} viewBox="0 0 46 46" fill="none" aria-hidden="true">
+          <line x1="23" y1="5"  x2="23" y2="18" stroke="#2DD4A5" strokeWidth="1.4" strokeLinecap="round" opacity="0.8"/>
+          <line x1="23" y1="28" x2="23" y2="41" stroke="#2DD4A5" strokeWidth="1.4" strokeLinecap="round" opacity="0.8"/>
+          <line x1="36" y1="12" x2="26" y2="20" stroke="rgba(255,255,255,0.35)" strokeWidth="1.4" strokeLinecap="round"/>
+          <line x1="36" y1="34" x2="26" y2="26" stroke="rgba(255,255,255,0.35)" strokeWidth="1.4" strokeLinecap="round"/>
+          <line x1="10" y1="12" x2="20" y2="20" stroke="rgba(255,255,255,0.35)" strokeWidth="1.4" strokeLinecap="round"/>
+          <line x1="10" y1="34" x2="20" y2="26" stroke="rgba(255,255,255,0.35)" strokeWidth="1.4" strokeLinecap="round"/>
+          <line x1="10" y1="12" x2="36" y2="12" stroke="rgba(45,212,165,0.15)" strokeWidth="1"/>
+          <line x1="10" y1="34" x2="36" y2="34" stroke="rgba(45,212,165,0.15)" strokeWidth="1"/>
+          <circle cx="23" cy="3"  r="3.5" fill="#2DD4A5"/>
+          <circle cx="37" cy="11" r="3"   fill="rgba(255,255,255,0.55)"/>
+          <circle cx="37" cy="35" r="3"   fill="rgba(255,255,255,0.55)"/>
+          <circle cx="23" cy="43" r="3.5" fill="#2DD4A5"/>
+          <circle cx="9"  cy="11" r="3"   fill="rgba(255,255,255,0.55)"/>
+          <circle cx="9"  cy="35" r="3"   fill="rgba(255,255,255,0.55)"/>
+          <circle cx="23" cy="23" r="7"   fill="#2DD4A5"/>
+          <circle cx="23" cy="23" r="3.5" fill="#071E1B"/>
+        </svg>
+      );
+    }
+
+    function Wordmark({ size = 'text-lg' }) {
+      return (
+        <span className={`${size} font-sans leading-none`} aria-label="NqshLab">
+          <span className="font-extrabold text-white">Nqsh</span>
+          <span className="font-normal text-teal">Lab</span>
+        </span>
+      );
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       LOADING + FORBIDDEN SCREENS
+    ═══════════════════════════════════════════════════════ */
+    function LoadingScreen() {
+      return (
+        <div style={{minHeight:'100vh', background:'#071E1B', display:'flex', alignItems:'center', justifyContent:'center'}}>
+          <div style={{width:'40px', height:'40px', border:'3px solid rgba(45,212,165,0.2)', borderTopColor:'#2DD4A5', borderRadius:'50%', animation:'spin 1s linear infinite'}} />
+        </div>
+      );
+    }
+
+    function ForbiddenScreen({ reason }) {
+      const isWrongRole = reason === 'wrong_role';
+      return (
+        <div className="grid-bg min-h-screen flex flex-col items-center justify-center px-4 text-center" style={{background:'#071E1B'}}>
+          <NqshMark size={48} />
+          <h1 className="font-display font-normal text-white mt-8 mb-3"
+            style={{fontSize:'clamp(1.75rem, 4vw, 2.5rem)', lineHeight:1.1, letterSpacing:'-0.02em'}}>
+            {isWrongRole
+              ? <>This portal is for <em style={{color:'#2DD4A5', fontStyle:'italic'}}>clients.</em></>
+              : <>Sign in to access <em style={{color:'#2DD4A5', fontStyle:'italic'}}>your dashboard.</em></>
+            }
+          </h1>
+          <p className="text-sm mb-8 max-w-xs" style={{color:'rgba(255,255,255,0.45)'}}>
+            {isWrongRole
+              ? 'Your account is registered as an annotator. The client portal is not available for annotator accounts.'
+              : 'You need a client account to access this page.'
+            }
+          </p>
+          <a href="standalone.html"
+            className="inline-flex items-center gap-2 font-semibold text-sm px-6 py-3 rounded-xl"
+            style={{background:'#2DD4A5', color:'#071E1B'}}
+            onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+            onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+            {isWrongRole ? '← Back to NqshLab' : 'Sign in on the main site'}
+          </a>
+        </div>
+      );
+    }
+
+
+    /* ─── shared lang helpers ─── */
+    const LANG_KEY = 'nqsh_lang';
+    function useLang() {
+      const [lang, setLangState] = React.useState(() => localStorage.getItem(LANG_KEY) || 'en');
+      const setLang = (l) => {
+        localStorage.setItem(LANG_KEY, l);
+        document.documentElement.dir  = l === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = l;
+        setLangState(l);
+      };
+      React.useEffect(() => {
+        document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+      }, []);
+      return [lang, setLang];
+    }
+    function LangBtn({ lang, setLang }) {
+      return (
+        <button onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+          className="font-mono text-xs px-2.5 py-1 rounded-lg"
+          style={{background:'rgba(255,255,255,0.05)',color:'rgba(255,255,255,0.45)',border:'1px solid rgba(255,255,255,0.1)',cursor:'pointer',transition:'all .15s',letterSpacing:'0.05em'}}
+          onMouseEnter={e=>{e.currentTarget.style.color='#fff';e.currentTarget.style.borderColor='rgba(45,212,165,0.3)';}}
+          onMouseLeave={e=>{e.currentTarget.style.color='rgba(255,255,255,0.45)';e.currentTarget.style.borderColor='rgba(255,255,255,0.1)';}}>
+          {lang === 'en' ? 'ع' : 'EN'}
+        </button>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CLIENT HEADER
+    ═══════════════════════════════════════════════════════ */
+    function ClientHeader({ user, onSignOut, lang, setLang }) {
+      return (
+        <header className="sticky top-0 z-50"
+          style={{background:'rgba(7,30,27,0.95)', backdropFilter:'blur(12px)', borderBottom:'1px solid rgba(45,212,165,0.12)'}}>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+
+              <div className="flex items-center gap-3">
+                <a href="standalone.html" className="flex items-center gap-2.5">
+                  <NqshMark size={26} />
+                  <Wordmark size="text-[16px]" />
+                </a>
+                <span className="hidden md:block font-mono text-xs"
+                  style={{color:'rgba(255,255,255,0.3)', borderLeft:'1px solid rgba(255,255,255,0.1)', marginLeft:'4px', paddingLeft:'12px', letterSpacing:'0.1em'}}>
+                  Client Portal
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <LangBtn lang={lang} setLang={setLang} />
+                <span className="hidden md:block text-sm font-medium font-sans"
+                  style={{color:'rgba(255,255,255,0.55)'}}>
+                  {user.name || user.email}
+                </span>
+                <a href="standalone.html"
+                  className="hidden md:block text-sm font-medium font-sans"
+                  style={{color:'rgba(255,255,255,0.35)', transition:'color .15s'}}
+                  onMouseEnter={e=>e.currentTarget.style.color='rgba(255,255,255,0.65)'}
+                  onMouseLeave={e=>e.currentTarget.style.color='rgba(255,255,255,0.35)'}>
+                  ← Site
+                </a>
+                <button onClick={onSignOut}
+                  className="inline-flex items-center justify-center gap-2 font-semibold text-sm px-4 py-2 rounded-xl"
+                  style={{background:'rgba(255,80,60,0.08)', color:'#FF503C', border:'1px solid rgba(255,80,60,0.18)', cursor:'pointer', transition:'opacity .15s'}}
+                  onMouseEnter={e=>e.currentTarget.style.opacity='0.8'}
+                  onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                  Sign out
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       STATS ROW
+    ═══════════════════════════════════════════════════════ */
+    function StatsRow({ stats }) {
+      const cards = [
+        { label: 'Active projects',  value: stats.activeProjects, suffix: '',  color: '#fff'     },
+        { label: 'In review',        value: stats.inReview,       suffix: '',  color: '#fff'     },
+        { label: 'Delivered',        value: stats.delivered,      suffix: '',  color: '#2DD4A5'  },
+        { label: 'Total spent',      value: `$${stats.totalSpent.toLocaleString('en-US', {minimumFractionDigits:2})}`, suffix: '', color: '#fff' },
+      ];
+      return (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          {cards.map(({ label, value, color }) => (
+            <div key={label} className="glass rounded-2xl p-5 md:p-6">
+              <p className="font-mono text-xs uppercase tracking-widest mb-3"
+                style={{color:'rgba(255,255,255,0.35)', letterSpacing:'0.15em'}}>
+                {label}
+              </p>
+              <p className="font-display font-normal"
+                style={{fontSize:'clamp(1.6rem, 3vw, 2.1rem)', lineHeight:1, color, letterSpacing:'-0.02em'}}>
+                {value}
+              </p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       STATUS CONFIG
+    ═══════════════════════════════════════════════════════ */
+    const STATUS_CONFIG = {
+      in_progress: { label: 'In progress', color: '#fbbf24', bg: 'rgba(251,191,36,0.08)',  border: 'rgba(251,191,36,0.22)' },
+      in_review:   { label: 'In review',   color: '#a78bfa', bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.22)' },
+      delivered:   { label: 'Delivered',   color: '#2DD4A5', bg: 'rgba(45,212,165,0.08)',  border: 'rgba(45,212,165,0.22)' },
+      scoping:     { label: 'Scoping',      color: 'rgba(255,255,255,0.4)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.12)' },
+    };
+
+
+    /* ═══════════════════════════════════════════════════════
+       PROJECT CARD
+    ═══════════════════════════════════════════════════════ */
+    function ProjectCard({ project, onOpen }) {
+      const [hovered, setHovered] = useState(false);
+      const st = STATUS_CONFIG[project.status] || STATUS_CONFIG.scoping;
+      const pct = project.totalItems > 0
+        ? Math.round((project.completedItems / project.totalItems) * 100)
+        : 0;
+
+      return (
+        <div className="rounded-2xl p-5 md:p-6 flex flex-col gap-4 cursor-pointer"
+          style={{
+            background: hovered ? 'rgba(45,212,165,0.06)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${hovered ? 'rgba(45,212,165,0.3)' : 'rgba(45,212,165,0.15)'}`,
+            transition: 'all .18s',
+          }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}>
+
+          {/* Top row */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="font-mono text-xs px-2.5 py-1 rounded-full"
+              style={{background:'rgba(45,212,165,0.08)', color:'#2DD4A5', border:'1px solid rgba(45,212,165,0.2)', letterSpacing:'0.08em'}}>
+              {project.domain}
+            </span>
+            <span className="font-mono text-xs px-2.5 py-1 rounded-full"
+              style={{background: st.bg, color: st.color, border:`1px solid ${st.border}`}}>
+              {st.label}
+            </span>
+          </div>
+
+          {/* Title + description */}
+          <div>
+            <h3 className="font-semibold text-white text-sm mb-1.5">{project.title}</h3>
+            <p className="text-xs leading-relaxed"
+              style={{
+                color:'rgba(255,255,255,0.45)',
+                display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden',
+              }}>
+              {project.description}
+            </p>
+          </div>
+
+          {/* Progress bar (only if started) */}
+          {project.totalItems > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="font-mono text-xs" style={{color:'rgba(255,255,255,0.35)'}}>
+                  {project.completedItems.toLocaleString()} / {project.totalItems.toLocaleString()} items
+                </span>
+                <span className="font-mono text-xs" style={{color: pct === 100 ? '#2DD4A5' : 'rgba(255,255,255,0.35)'}}>
+                  {pct}%
+                </span>
+              </div>
+              <div className="rounded-full overflow-hidden" style={{height:'3px', background:'rgba(255,255,255,0.07)'}}>
+                <div style={{
+                  height:'100%',
+                  width:`${pct}%`,
+                  background: pct === 100 ? '#2DD4A5' : 'rgba(45,212,165,0.6)',
+                  borderRadius:'2px',
+                  transition:'width 0.4s ease',
+                }} />
+              </div>
+            </div>
+          )}
+
+          {/* Metadata */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {project.annotators > 0 && (
+              <span className="flex items-center gap-1.5 font-mono text-xs" style={{color:'rgba(255,255,255,0.35)'}}>
+                <UsersIcon />
+                {project.annotators} annotators
+              </span>
+            )}
+            {project.estimatedDelivery && (
+              <>
+                <span className="font-mono text-xs" style={{color:'rgba(255,255,255,0.2)'}}>·</span>
+                <span className="flex items-center gap-1.5 font-mono text-xs" style={{color:'rgba(255,255,255,0.35)'}}>
+                  <CalendarIcon />
+                  {project.estimatedDelivery}
+                </span>
+              </>
+            )}
+            {project.qualityScore && (
+              <>
+                <span className="font-mono text-xs" style={{color:'rgba(255,255,255,0.2)'}}>·</span>
+                <span className="font-mono text-xs" style={{color:'#2DD4A5'}}>
+                  {project.qualityScore}% accuracy
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Recent activity */}
+          <p className="font-mono text-xs px-3 py-2 rounded-lg"
+            style={{background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.35)', lineHeight:1.5}}>
+            {project.recentActivity}
+          </p>
+
+          {/* CTA */}
+          <button
+            onClick={() => onOpen(project)}
+            className="w-full font-semibold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2"
+            style={{background:'#2DD4A5', color:'#071E1B', border:'none', cursor:'pointer', transition:'opacity .15s'}}
+            onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+            onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+            View details
+            <ArrowRightIcon className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      );
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       PROJECT LIST
+    ═══════════════════════════════════════════════════════ */
+    function ProjectList({ projects, onOpen }) {
+      const active    = projects.filter(p => p.status === 'in_progress' || p.status === 'in_review' || p.status === 'scoping');
+      const delivered = projects.filter(p => p.status === 'delivered');
+
+      return (
+        <div className="flex flex-col gap-10">
+          <div>
+            <div className="mono-label">Your projects</div>
+            {active.length === 0 ? (
+              <div className="glass rounded-2xl p-10 text-center">
+                <p className="font-mono text-sm" style={{color:'rgba(255,255,255,0.3)'}}>No active projects yet.</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {active.map(p => <ProjectCard key={p.id} project={p} onOpen={onOpen} />)}
+              </div>
+            )}
+          </div>
+
+          {delivered.length > 0 && (
+            <div>
+              <div className="mono-label">Delivered</div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {delivered.map(p => <ProjectCard key={p.id} project={p} onOpen={onOpen} />)}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       PROJECT DETAIL VIEW
+    ═══════════════════════════════════════════════════════ */
+    function ProjectDetail({ project, onBack }) {
+      const st  = STATUS_CONFIG[project.status] || STATUS_CONFIG.scoping;
+      const pct = project.totalItems > 0
+        ? Math.round((project.completedItems / project.totalItems) * 100)
+        : 0;
+
+      const timeline = [
+        project.startDate        && { label: 'Project started',           date: project.startDate,          done: true  },
+        project.totalItems > 0   && { label: 'Annotation in progress',    date: null,                       done: project.status !== 'scoping' },
+        project.status === 'in_review' && { label: 'Quality review',      date: null,                       done: false, active: true },
+        project.status === 'delivered' && { label: 'Dataset delivered',   date: project.estimatedDelivery,  done: true  },
+        !['delivered','in_review'].includes(project.status) && project.estimatedDelivery
+          && { label: 'Estimated delivery', date: project.estimatedDelivery, done: false },
+      ].filter(Boolean);
+
+      return (
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
+
+          {/* Back */}
+          <button onClick={onBack}
+            className="flex items-center gap-2 font-mono text-sm mb-6"
+            style={{color:'rgba(255,255,255,0.4)', background:'none', border:'none', cursor:'pointer', transition:'color .15s'}}
+            onMouseEnter={e=>e.currentTarget.style.color='rgba(255,255,255,0.8)'}
+            onMouseLeave={e=>e.currentTarget.style.color='rgba(255,255,255,0.4)'}>
+            <ArrowLeftIcon className="w-3.5 h-3.5" />
+            Back to dashboard
+          </button>
+
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <span className="font-mono text-xs px-2.5 py-1 rounded-full"
+                style={{background:'rgba(45,212,165,0.08)', color:'#2DD4A5', border:'1px solid rgba(45,212,165,0.2)'}}>
+                {project.domain}
+              </span>
+              <span className="font-mono text-xs px-2.5 py-1 rounded-full"
+                style={{background: st.bg, color: st.color, border:`1px solid ${st.border}`}}>
+                {st.label}
+              </span>
+            </div>
+            <h2 className="font-display font-normal text-white mb-2"
+              style={{fontSize:'clamp(1.5rem, 3vw, 2rem)', lineHeight:1.1, letterSpacing:'-0.02em'}}>
+              {project.title}
+            </h2>
+            <p className="text-sm leading-relaxed" style={{color:'rgba(255,255,255,0.5)'}}>
+              {project.description}
+            </p>
+          </div>
+
+          {/* Progress */}
+          {project.totalItems > 0 && (
+            <div className="glass rounded-2xl p-6 mb-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-mono text-xs uppercase tracking-widest" style={{color:'rgba(255,255,255,0.35)', letterSpacing:'0.15em'}}>
+                  Annotation progress
+                </p>
+                <span className="font-mono text-sm font-medium" style={{color: pct === 100 ? '#2DD4A5' : '#fff'}}>
+                  {pct}%
+                </span>
+              </div>
+              <div className="rounded-full overflow-hidden mb-3" style={{height:'6px', background:'rgba(255,255,255,0.07)'}}>
+                <div style={{
+                  height:'100%', width:`${pct}%`,
+                  background: pct === 100 ? '#2DD4A5' : 'rgba(45,212,165,0.7)',
+                  borderRadius:'3px', transition:'width 0.4s ease',
+                }} />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs" style={{color:'rgba(255,255,255,0.4)'}}>
+                  {project.completedItems.toLocaleString()} of {project.totalItems.toLocaleString()} items labeled
+                </span>
+                {project.qualityScore && (
+                  <span className="font-mono text-xs" style={{color:'#2DD4A5'}}>
+                    {project.qualityScore}% inter-annotator agreement
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+            {[
+              { label: 'Annotators',   value: project.annotators || '—' },
+              { label: 'Total items',  value: project.totalItems > 0 ? project.totalItems.toLocaleString() : '—' },
+              { label: 'Spent',        value: project.spent > 0 ? `$${project.spent.toLocaleString('en-US', {minimumFractionDigits:2})}` : '—' },
+              { label: 'Quality',      value: project.qualityScore ? `${project.qualityScore}%` : '—' },
+            ].map(({ label, value }) => (
+              <div key={label} className="glass rounded-xl p-4">
+                <p className="font-mono text-xs uppercase mb-2" style={{color:'rgba(255,255,255,0.3)', letterSpacing:'0.12em'}}>{label}</p>
+                <p className="font-semibold text-white text-base">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Timeline */}
+          <div className="glass rounded-2xl p-6 mb-5">
+            <p className="font-mono text-xs uppercase tracking-widest mb-5" style={{color:'rgba(255,255,255,0.35)', letterSpacing:'0.15em'}}>
+              Timeline
+            </p>
+            <div className="flex flex-col gap-4">
+              {timeline.map((item, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{
+                      background: item.done ? '#2DD4A5' : (item.active ? 'rgba(45,212,165,0.15)' : 'rgba(255,255,255,0.06)'),
+                      border: item.active ? '1px solid #2DD4A5' : 'none',
+                    }}>
+                    {item.done && <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#071E1B" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
+                    {item.active && <div style={{width:'6px', height:'6px', borderRadius:'50%', background:'#2DD4A5'}} />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium" style={{color: item.done ? '#fff' : (item.active ? '#2DD4A5' : 'rgba(255,255,255,0.35)')}}>{item.label}</p>
+                    {item.date && <p className="font-mono text-xs mt-0.5" style={{color:'rgba(255,255,255,0.3)'}}>{item.date}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent activity */}
+          <div className="glass rounded-2xl p-5">
+            <p className="font-mono text-xs uppercase tracking-widest mb-3" style={{color:'rgba(255,255,255,0.35)', letterSpacing:'0.15em'}}>Latest update</p>
+            <p className="text-sm leading-relaxed" style={{color:'rgba(255,255,255,0.6)'}}>{project.recentActivity}</p>
+          </div>
+
+          {/* CTA for in-review */}
+          {project.status === 'in_review' && (
+            <div className="mt-5 glass-teal rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold text-white text-sm mb-1">Ready for your sign-off</p>
+                <p className="text-xs" style={{color:'rgba(255,255,255,0.5)'}}>Review the quality report and confirm delivery to close this project.</p>
+              </div>
+              <a href="mailto:nawaf@nqshlab.com?subject=Sign-off: ${project.title}"
+                className="flex-shrink-0 inline-flex items-center gap-2 font-semibold text-sm px-5 py-2.5 rounded-xl"
+                style={{background:'#2DD4A5', color:'#071E1B', transition:'opacity .15s'}}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                Contact us to confirm
+              </a>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       NEW PROJECT BANNER
+    ═══════════════════════════════════════════════════════ */
+    function NewProjectBanner() {
+      return (
+        <div className="grid-bg rounded-2xl px-6 md:px-10 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 mb-10"
+          style={{background:'rgba(45,212,165,0.04)', border:'1px solid rgba(45,212,165,0.18)'}}>
+          <div>
+            <p className="font-mono text-xs uppercase tracking-widest mb-1.5" style={{color:'#2DD4A5', letterSpacing:'0.18em'}}>Start something new</p>
+            <h3 className="font-display font-normal text-white mb-1" style={{fontSize:'1.25rem', lineHeight:1.2, letterSpacing:'-0.02em'}}>
+              Need annotation work done?
+            </h3>
+            <p className="text-sm" style={{color:'rgba(255,255,255,0.45)'}}>Tell us your task and we'll scope it — usually within 24 hours.</p>
+          </div>
+          <a href="mailto:nawaf@nqshlab.com?subject=New annotation project"
+            className="flex-shrink-0 inline-flex items-center gap-2 font-semibold text-sm px-5 py-3 rounded-xl"
+            style={{background:'#2DD4A5', color:'#071E1B', transition:'opacity .15s'}}
+            onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+            onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+            Request a project
+            <ArrowRightIcon className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      );
+    }
+
+
+    /* ═══════════════════════════════════════════════════════
+       APP
+    ═══════════════════════════════════════════════════════ */
+    function App() {
+      const [lang, setLang] = useLang();
+      const [authLoading,     setAuthLoading]     = useState(true);
+      const [user,            setUser]            = useState(null);
+      const [forbiddenReason, setForbiddenReason] = useState(null);
+      const [view,            setView]            = useState('loading');
+      const [activeProject,   setActiveProject]   = useState(null);
+
+      useEffect(() => {
+        const unsub = auth.onAuthStateChanged((u) => {
+          if (!u) {
+            setForbiddenReason('not_logged_in');
+            setView('forbidden');
+          } else {
+            const role = localStorage.getItem(`nqsh_role_${u.uid}`);
+            if (role !== 'client') {
+              setForbiddenReason('wrong_role');
+              setView('forbidden');
+            } else {
+              setUser({ name: u.displayName, email: u.email, role });
+              setView('dashboard');
+            }
+          }
+          setAuthLoading(false);
+        });
+        return () => unsub();
+      }, []);
+
+      const handleOpenProject = useCallback((project) => {
+        setActiveProject(project);
+        setView('detail');
+      }, []);
+
+      const handleSignOut = useCallback(async () => {
+        await auth.signOut();
+        setUser(null);
+        setForbiddenReason('not_logged_in');
+        setView('forbidden');
+      }, []);
+
+      if (authLoading) return <LoadingScreen />;
+      if (view === 'forbidden') return <ForbiddenScreen reason={forbiddenReason} />;
+
+      const shell = (children) => (
+        <div style={{minHeight:'100vh', background:'#071E1B', color:'#fff', fontFamily:"'ThmanyahSans', system-ui, sans-serif"}}>
+          <ClientHeader user={user} onSignOut={handleSignOut} lang={lang} setLang={setLang} />
+          {children}
+        </div>
+      );
+
+      if (view === 'detail' && activeProject) {
+        return shell(
+          <ProjectDetail
+            project={activeProject}
+            onBack={() => { setView('dashboard'); setActiveProject(null); }}
+          />
+        );
+      }
+
+      return shell(
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 fade-in">
+          <div className="mb-8">
+            <h1 className="font-display font-normal text-white mb-1"
+              style={{fontSize:'clamp(1.5rem, 3vw, 2rem)', lineHeight:1.15, letterSpacing:'-0.02em'}}>
+              Welcome back, <em style={{color:'#2DD4A5', fontStyle:'italic'}}>{(user.name || user.email).split(' ')[0]}.</em>
+            </h1>
+            <p className="text-sm font-sans" style={{color:'rgba(255,255,255,0.4)'}}>
+              Here's the status of your annotation projects.
+            </p>
+          </div>
+          <StatsRow stats={MOCK_STATS} />
+          <NewProjectBanner />
+          <ProjectList projects={MOCK_PROJECTS} onOpen={handleOpenProject} />
+        </main>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
