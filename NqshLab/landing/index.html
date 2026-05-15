@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NqshLab — Train Your AI on Real Expertise</title>
+  <meta name="description" content="Expert-led data annotation and evaluation for AI teams. PhD researchers, clinicians, and domain specialists — not crowd workers." />
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:  { DEFAULT: '#071E1B', deep: '#050F0D' },
+            teal: { DEFAULT: '#2DD4A5', dim: '#1A8A6E'  },
+          },
+          fontFamily: {
+            sans:    ['ThmanyahSans', 'system-ui', 'sans-serif'],
+            display: ['ThmanyahSerifDisplay', 'Georgia', 'serif'],
+            mono:    ['"DM Mono"', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSans'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahsans/woff2/thmanyahsans-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'ThmanyahSerifDisplay'; src: url('../Thmanyah-Font-Family/thmanyah typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+
+    /* ── LIGHT MODE (default) ─────────────────────────────── */
+    :root {
+      --bg:            #ffffff;
+      --bg-deep:       #f2f7f5;
+      --fg:            #0A1C19;
+      --fg-hi:         rgba(10,28,25,0.85);
+      --fg-md:         rgba(10,28,25,0.6);
+      --fg-lo:         rgba(10,28,25,0.45);
+      --fg-vl:         rgba(10,28,25,0.35);
+      --fg-ul:         rgba(10,28,25,0.25);
+      --surface:       rgba(0,0,0,0.035);
+      --surface-hi:    rgba(0,0,0,0.06);
+      --border:        rgba(45,212,165,0.25);
+      --border-hi:     rgba(45,212,165,0.38);
+      --border-sm:     rgba(45,212,165,0.18);
+      --teal:          #2DD4A5;
+      --teal-link:     #0A7A5E;
+      --teal-md:       rgba(10,122,94,0.75);
+      --teal-lo:       rgba(10,122,94,0.55);
+      --teal-vl:       rgba(45,212,165,0.22);
+      --teal-ul:       rgba(45,212,165,0.1);
+      --teal-surface:  rgba(45,212,165,0.08);
+      --teal-brd:      rgba(45,212,165,0.35);
+      --nav-bg:        rgba(255,255,255,0.97);
+      --ink-inner:     #ffffff;
+      --grid-color:    rgba(45,212,165,0.1);
+      --red-surface:   rgba(255,80,60,0.06);
+      --red-border:    rgba(255,80,60,0.2);
+      --section-alt:   rgba(0,0,0,0.02);
+    }
+
+    /* ── NIGHT MODE (black) ───────────────────────────────── */
+    [data-theme="dark"] {
+      --bg:            #0a0a0a;
+      --bg-deep:       #000000;
+      --fg:            #ffffff;
+      --fg-hi:         rgba(255,255,255,0.85);
+      --fg-md:         rgba(255,255,255,0.55);
+      --fg-lo:         rgba(255,255,255,0.42);
+      --fg-vl:         rgba(255,255,255,0.3);
+      --fg-ul:         rgba(255,255,255,0.2);
+      --surface:       rgba(255,255,255,0.05);
+      --surface-hi:    rgba(255,255,255,0.09);
+      --border:        rgba(45,212,165,0.14);
+      --border-hi:     rgba(45,212,165,0.22);
+      --border-sm:     rgba(45,212,165,0.09);
+      --teal:          #2DD4A5;
+      --teal-link:     #2DD4A5;
+      --teal-md:       rgba(45,212,165,0.6);
+      --teal-lo:       rgba(45,212,165,0.4);
+      --teal-vl:       rgba(45,212,165,0.15);
+      --teal-ul:       rgba(45,212,165,0.07);
+      --teal-surface:  rgba(45,212,165,0.05);
+      --teal-brd:      rgba(45,212,165,0.2);
+      --nav-bg:        rgba(10,10,10,0.97);
+      --ink-inner:     #0a0a0a;
+      --grid-color:    rgba(45,212,165,0.08);
+      --red-surface:   rgba(255,80,60,0.04);
+      --red-border:    rgba(255,80,60,0.18);
+      --section-alt:   rgba(255,255,255,0.02);
+    }
+
+    html  { scroll-behavior: smooth; background: var(--bg); }
+    body  { background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+
+    .glass      { background: var(--surface);      border: 1px solid var(--border);    }
+    .glass-teal { background: var(--teal-surface); border: 1px solid var(--teal-brd);  }
+    .glass-red  { background: var(--red-surface);  border: 1px solid var(--red-border);}
+
+    .grid-bg {
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .fade-top { border-top: 1px solid var(--border-sm); }
+
+    .mono-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--teal-link);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .mono-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    select option { background: var(--bg); color: var(--fg); }
+
+    #root:empty::before { content:''; display:block; height:100vh; background:var(--bg); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    /* ═══════════════════════════════════════════════════════
+       FIREBASE
+    ═══════════════════════════════════════════════════════ */
+    const firebaseConfig = {
+      apiKey: "AIzaSyACErx-oPDy-LHw1RkhNak1nwYuDbFOMBs",
+      authDomain: "nqshlab.firebaseapp.com",
+      projectId: "nqshlab",
+      storageBucket: "nqshlab.firebasestorage.app",
+      messagingSenderId: "19755138224",
+      appId: "1:19755138224:web:e75f9d694267cb32ac4f75",
+      measurementId: "G-FQ0JB5NCQG"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    /* ═══════════════════════════════════════════════════════
+       CONFIG
+    ═══════════════════════════════════════════════════════ */
+    const EMAIL   = 'nawaf@nqshlab.com';
+    const WEBSITE = 'nqshlab.com';
+    const LINKEDIN = '#';
+    const BOOK_URL = '#book-call';
+
+    /* ═══════════════════════════════════════════════════════
+       TRANSLATIONS  (EN + Najdi AR)
+    ═══════════════════════════════════════════════════════ */
+    const T = {
+      en: {
+        langBtn: 'ع',
+        nav: { why:'Why experts', how:'How it works', faq:'FAQ', signin:'Sign in', signup:'Sign up', signout:'Sign out' },
+        hero: {
+          h1: 'Train your AI on', h1accent: 'real expertise.',
+          sub: 'Crowd annotation breaks down the moment your task requires real expertise. We staff your project with researchers, clinicians, and field specialists who annotate from knowledge, not guesswork.',
+          domainsLabel: 'Annotation expertise in',
+          domains: ['Healthcare','Legal','Finance','Life Sciences','AI / LLMs','Scientific Research','And much more'],
+        },
+        why: {
+          label: 'Why it matters',
+          title: "Crowd workers can't annotate", accent: "what they don't know.",
+          sub: "Speed and cost optimization works fine for simple tasks. But for domain-heavy work, it just moves the quality problem downstream, into your model.",
+          features: [
+            { title:'Domain matched',     desc:'Every annotator selected for your specific subject matter' },
+            { title:'Managed end-to-end', desc:'We handle sourcing, QA, and delivery, you focus on building' },
+            { title:'Rigorous QA',        desc:'Multi layer quality checks applied to every annotation batch' },
+            { title:'Compliance ready',   desc:'HIPAA, GDPR, and SOC2 aligned data handling' },
+          ],
+        },
+        how: {
+          label: 'Process',
+          title: 'Simple', accent: 'steps.',
+          sub: "You share the task and review the output. We handle the sourcing, calibration, and QA in between. That's the whole arrangement.",
+          steps: [
+            { num:'01', title:"Tell us what you're building",
+              body:"Send us your task, your domain, any existing examples, and your quality bar. We'll tell you what kind of expertise you need." },
+            { num:'02', title:'We find people who know it',
+              body:"We don't pull from a general crowd pool. We recruit from academic networks, professional communities, and direct outreach, then run calibration on your specific task before anyone touches real data." },
+            { num:'03', title:'Clean data, documented quality',
+              body:'Every deliverable includes a quality report, agreement rates, reviewer notes, edge case flags. You can see how each label was produced, not just that it was.' },
+          ],
+          cta: 'Walk us through your project',
+        },
+        cta: {
+          label: 'Get started',
+          title: 'The model learns from', accent: 'what you give it.',
+          sub: "If crowd annotation hasn't worked — or you already know it won't — let's talk.",
+        },
+        faq: {
+          label: 'FAQ', title: 'Common questions.',
+          footer: 'Have a question not covered here?', footerLink: 'Email us →',
+          items: [
+            { q:'What kinds of tasks do you handle?',
+              a:"Tasks where the annotation only makes sense if you understand the domain. Medical record classification, legal document review, scientific literature labeling, RLHF preference data, LLM evaluation, anything where you need someone who actually knows the field, not just someone who can follow instructions." },
+            { q:'How are you different from Scale AI, Appen, or Mechanical Turk?',
+              a:"Those platforms are built for volume. Ours is built for accuracy on tasks that require real subject matter knowledge. If you need a million simple labels fast, they're probably the better call. If you need a cardiologist to read an echo report or a lawyer to classify contract clauses, that's our territory." },
+            { q:'How do you find and vet annotators?',
+              a:'Academic networks, professional communities, direct outreach to people working in the field. We screen for credentials and domain knowledge, then run calibration on your specific task before anyone touches real data. We reject people who do fine on the credential check but poorly on calibration.' },
+            { q:'How do you keep quality consistent?',
+              a:'Inter-annotator agreement is tracked throughout, not just at delivery. When it drops, we stop and figure out why, a genuinely hard case, or an annotator who needs to be replaced. Every deliverable comes with a quality report you can actually read.' },
+            { q:'Can you handle HIPAA, GDPR, or SOC2-regulated data?',
+              a:"Yes. NDAs are standard on every project. We support workflows aligned with HIPAA, GDPR, and SOC2 requirements, and can work within client-defined security environments including air-gapped setups. Tell us your constraints on the first call and we'll tell you if they're workable." },
+            { q:'What does pricing look like?',
+              a:"Project-based. It depends on domain, task complexity, volume, and timeline. We don't publish rates because every project is different. Book a call and we'll scope it honestly." },
+          ],
+        },
+        footer: {
+          tagline: 'Expert-led data annotation and evaluation for AI teams building high-stakes products.',
+          product: 'Product', company: 'Company',
+          copyright: (y) => `© ${y} NqshLab. All rights reserved.`,
+        },
+        auth: {
+          createTitle: 'Create your', createAccent: 'account.',
+          signinTitle: 'Welcome', signinAccent: 'back.',
+          createSub: 'Join as an expert annotator.',
+          signinSub: 'Sign in to your NqshLab account.',
+          tabSignin: 'Sign in', tabSignup: 'Sign up',
+          name: 'Full name', namePh: 'Dr. Jane Smith',
+          field: 'Field of expertise', degree: 'Highest degree',
+          email: 'Email', emailPh: 'you@company.com',
+          password: 'Password', confirm: 'Confirm password',
+          forgot: 'Forgot password?',
+          submitCreate: 'Create account', submitSignin: 'Sign in',
+          loading: 'Please wait...',
+          switchToSignin: 'Already have an account?', switchLinkSignin: 'Sign in',
+          switchToSignup: "Don't have an account?", switchLinkSignup: 'Sign up',
+          back: '← Back to site',
+          fields: ['Law','Medicine','Finance','Computer Science','Mathematics','Linguistics','Life Sciences','Chemistry','Physics','Social Sciences','Other'],
+          degrees: ["PhD","MD","JD","Master's","Bachelor's","Professional Cert.","Other"],
+          fieldPh: 'Select field', degreePh: 'Select degree',
+          otherFieldPh: 'Please specify your field', otherDegreePh: 'Please specify your degree',
+        },
+      },
+
+      ar: {
+        langBtn: 'EN',
+        nav: { why:'ليش الخبراء', how:'كيف يشتغل', faq:'الأسئلة', signin:'دخول', signup:'تسجيل', signout:'خروج' },
+        hero: {
+          h1: 'درّب ذكاءك الاصطناعي على', h1accent: 'خبرات حقيقية.',
+          sub: 'المنصات الجماهيرية تفشل أول ما تحتاج معرفة فعلية بالمجال. نوفر لك باحثين وأطباء ومتخصصين يوسّمون من خبرة، مو تخمين.',
+          domainsLabel: 'نشتغل في مجالات',
+          domains: ['الرعاية الصحية','القانون','المالية','علوم الحياة','الذكاء الاصطناعي','البحث العلمي','وغيرها'],
+        },
+        why: {
+          label: 'ليه تهتم',
+          title: 'الحشود ما تقدر توسّم', accent: 'اللي ما تعرفه.',
+          sub: 'زيادة اعداد الموسمين ينفع للمهام البسيطة. أما في الشغل المتخصص، ما يسوي إلا انه ينقل مشكلة الجودة للنموذج.',
+          features: [
+            { title:'مطابق للمجال',           desc:'كل موسِّم يُختار حسب موضوعك بالتحديد' },
+            { title:'مدار من الأول للآخر',    desc:'نتولى الاستقطاب والجودة والتسليم، أنت ركّز على البناء' },
+            { title:'ضبط جودة صارم',          desc:'فحوصات متعددة تُطبَّق على كل دفعة توسيم' },
+            { title:'جاهز للامتثال',          desc:'تعامل متوافق مع HIPAA وGDPR وSOC2' },
+          ],
+        },
+        how: {
+          label: 'العملية',
+          title: ' خطوات', accent: ' بسيطة.',
+          sub: 'أنت تشارك المهمة وتراجع الناتج، وحنا نتولى الاستقطاب والمعايرة وضبط الجودة.',
+          steps: [
+            { num:'01', title:'قلنا وش تبني',
+              body:'ارسل لنا المهمة والمجال وأي أمثلة عندك ومعيار الجودة اللي تبيه. راح نقولك وش نوع الخبرة اللي تحتاجها ونقدمها لك.' },
+            { num:'02', title:'نجيب اللي يعرف مجالك',
+              body:'ما نسحب من قاعدة حشود عامة. نجيب من الشبكات الأكاديمية والمجتمعات المهنية، بعدين نعاير على مهمتك بالتحديد قبل أي أحد يلمس البيانات الحقيقية.' },
+            { num:'03', title:'بيانات نظيفة وجودة موثّقة',
+              body:'كل تسليم فيه نسب اتفاق وملاحظات مراجعين وإشارات للحالات الحدّية. تقدر تشوف كيف انتُج كل وسم، مو بس إنه انتُج.' },
+          ],
+          cta: 'اشرح لنا مشروعك ',
+        },
+        cta: {
+          label: 'ابدأ الحين',
+          title: 'النموذج يتعلم من اللي', accent: 'تعطيه إياه.',
+          sub: 'إذا التوسيم الجماهيري ما نفع — أو تعرف من البداية إنه ما راح ينفع — كلمنا.',
+        },
+        faq: {
+          label: 'الأسئلة', title: 'أسئلة شائعة.',
+          footer: 'عندك سؤال ثاني؟', footerLink: 'راسلنا →',
+          items: [
+            { q:'وش نوع المهام اللي تشتغلون فيها؟',
+              a:'المهام اللي ما ينفع توسيمها إلا بمعرفة المجال. تصنيف سجلات طبية ومراجعة مستندات قانونية وتوسيم أدبيات علمية وبيانات RLHF وتقييم نماذج اللغة، كل شي تحتاج فيه أحد يعرف المجال فعلاً، مو بس يمشي على تعليمات.' },
+            { q:'وش الفرق بينكم وبين Scale AI وAppen وMechanical Turk؟',
+              a:'هذي منصات مبنية للحجم. حنا مبنيين للدقة في المهام اللي تحتاج معرفة حقيقية. إذا تبي ملايين وسوم بسيطة بسرعة، هم الأنسب. أما إذا تبي طبيب قلب أو محامي، هذا مجالنا.' },
+            { q:'كيف تجيبون الموسِّمين وتتحققون منهم؟',
+              a:'من الشبكات الأكاديمية والمجتمعات المهنية والتواصل المباشر مع ناس يشتغلون في المجال. نتحقق من الشهادات والمعرفة، بعدين نعاير على مهمتك بالتحديد. ونراقب جودة شغلهم طول الطريق.' },
+            { q:'كيف تحافظون على ثبات الجودة؟',
+              a:'نتابع مع الموسِّمين أول بأول، مو بس عند التسليم. لما ينخفض، نوقف ونكتشف ليش. كل تسليم يجيك مع تقرير جودة تقدر تقرأه فعلاً.' },
+            { q:'تقدرون تشتغلون مع بيانات HIPAA وGDPR وSOC2؟',
+              a:'إيه. اتفاقيات السرية معيار في كل مشروع. ندعم سير العمل المتوافقة مع HIPAA وGDPR وSOC2، وتشمل الإعدادات المعزولة تماماً.' },
+            { q:'كم يكلف المشروع الواحد؟',
+              a:'يعتمد على المشروع، حجمة، مجالة، وتعقيدة، راح نعطيك تقدير اولي أول ما تزودنا بتفاصيل مشروعك' },
+          ],
+        },
+        footer: {
+          tagline: 'توسيم بيانات بإشراف خبراء لفرق الذكاء الاصطناعي اللي تبني منتجات ما تتحمل الخطأ.',
+          product: 'المنتج', company: 'الشركة',
+          copyright: (y) => `© ${y} نقش لاب. كل الحقوق محفوظة.`,
+        },
+        auth: {
+          createTitle: 'سجّل', createAccent: 'حسابك.',
+          signinTitle: 'أهلاً', signinAccent: 'بك.',
+          createSub: 'انضم كموسِّم خبير.',
+          signinSub: 'سجّل دخولك لحساب نقش لاب.',
+          tabSignin: 'دخول', tabSignup: 'تسجيل',
+          name: 'الاسم الكامل', namePh: 'د. نورة عبدالعزيز',
+          field: 'مجال الخبرة', degree: 'أعلى شهادة',
+          email: 'الإيميل', emailPh: 'you@company.com',
+          password: 'كلمة المرور', confirm: 'تأكيد كلمة المرور',
+          forgot: 'نسيت كلمة المرور؟',
+          submitCreate: 'سجّل حسابك', submitSignin: 'دخول',
+          loading: 'يُرجى الانتظار…',
+          switchToSignin: 'عندك حساب؟', switchLinkSignin: 'دخول',
+          switchToSignup: 'ما عندك حساب؟', switchLinkSignup: 'سجّل',
+          back: 'رجوع →',
+          fields: ['القانون','الطب','المالية','علوم الحاسوب','الرياضيات','اللغويات','علوم الحياة','الكيمياء','الفيزياء','العلوم الاجتماعية','أخرى'],
+          degrees: ['دكتوراه','MD','JD','ماجستير','بكالوريوس','شهادة مهنية','أخرى'],
+          fieldPh: 'اختر المجال', degreePh: 'اختر الشهادة',
+          otherFieldPh: 'حدّد مجالك', otherDegreePh: 'حدّد شهادتك',
+        },
+      },
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       THEME HOOK
+    ═══════════════════════════════════════════════════════ */
+    const THEME_KEY = 'nqsh_theme';
+    function useTheme() {
+      const [theme, setThemeState] = useState(() => localStorage.getItem(THEME_KEY) || 'light');
+      const setTheme = (v) => {
+        localStorage.setItem(THEME_KEY, v);
+        document.documentElement.dataset.theme = v;
+        setThemeState(v);
+      };
+      useEffect(() => { document.documentElement.dataset.theme = theme; }, []);
+      return [theme, setTheme];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LANG HOOK
+    ═══════════════════════════════════════════════════════ */
+    const LANG_KEY = 'nqsh_lang';
+    function useLang() {
+      const [lang, setLangState] = useState(() => localStorage.getItem(LANG_KEY) || 'en');
+      const setLang = (l) => {
+        localStorage.setItem(LANG_KEY, l);
+        document.documentElement.dir  = l === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = l;
+        setLangState(l);
+      };
+      useEffect(() => {
+        document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+      }, []);
+      return [lang, setLang];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       THEME BUTTON
+    ═══════════════════════════════════════════════════════ */
+    function ThemeBtn({ theme, setTheme }) {
+      const isDark = theme === 'dark';
+      return (
+        <button onClick={() => setTheme(isDark ? 'light' : 'dark')}
+          title={isDark ? 'Switch to light mode' : 'Switch to night mode'}
+          className="flex items-center justify-center w-8 h-8 rounded-lg"
+          style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border-sm)',cursor:'pointer',transition:'all .15s',flexShrink:0}}
+          onMouseEnter={e=>{e.currentTarget.style.color='var(--fg)';e.currentTarget.style.borderColor='var(--border)'}}
+          onMouseLeave={e=>{e.currentTarget.style.color='var(--fg-lo)';e.currentTarget.style.borderColor='var(--border-sm)'}}>
+          {isDark ? (
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          ) : (
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+            </svg>
+          )}
+        </button>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LANG BUTTON
+    ═══════════════════════════════════════════════════════ */
+    function LangBtn({ lang, setLang }) {
+      return (
+        <button onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+          className="font-mono text-xs px-2.5 py-1 rounded-lg"
+          style={{background:'var(--surface)',color:'var(--fg-lo)',border:'1px solid var(--border-sm)',cursor:'pointer',transition:'all .15s',letterSpacing:'0.05em',flexShrink:0}}
+          onMouseEnter={e=>{e.currentTarget.style.color='var(--fg)';e.currentTarget.style.borderColor='var(--border)'}}
+          onMouseLeave={e=>{e.currentTarget.style.color='var(--fg-lo)';e.currentTarget.style.borderColor='var(--border-sm)'}}>
+          {T[lang].langBtn}
+        </button>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LOGO
+    ═══════════════════════════════════════════════════════ */
+    function NqshMark({ size = 28 }) {
+      return (
+        <svg width={size} height={size} viewBox="0 0 46 46" fill="none" aria-hidden="true">
+          <line x1="23" y1="5"  x2="23" y2="18" stroke="#2DD4A5" strokeWidth="1.4" strokeLinecap="round" opacity="0.8"/>
+          <line x1="23" y1="28" x2="23" y2="41" stroke="#2DD4A5" strokeWidth="1.4" strokeLinecap="round" opacity="0.8"/>
+          <line x1="36" y1="12" x2="26" y2="20" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" style={{color:'var(--fg)'}}/>
+          <line x1="36" y1="34" x2="26" y2="26" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" style={{color:'var(--fg)'}}/>
+          <line x1="10" y1="12" x2="20" y2="20" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" style={{color:'var(--fg)'}}/>
+          <line x1="10" y1="34" x2="20" y2="26" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" style={{color:'var(--fg)'}}/>
+          <line x1="10" y1="12" x2="36" y2="12" stroke="#2DD4A5" strokeOpacity="0.15" strokeWidth="1"/>
+          <line x1="10" y1="34" x2="36" y2="34" stroke="#2DD4A5" strokeOpacity="0.15" strokeWidth="1"/>
+          <circle cx="23" cy="3"  r="3.5" fill="#2DD4A5"/>
+          <circle cx="37" cy="11" r="3"   fill="currentColor" opacity="0.55" style={{color:'var(--fg)'}}/>
+          <circle cx="37" cy="35" r="3"   fill="currentColor" opacity="0.55" style={{color:'var(--fg)'}}/>
+          <circle cx="23" cy="43" r="3.5" fill="#2DD4A5"/>
+          <circle cx="9"  cy="11" r="3"   fill="currentColor" opacity="0.55" style={{color:'var(--fg)'}}/>
+          <circle cx="9"  cy="35" r="3"   fill="currentColor" opacity="0.55" style={{color:'var(--fg)'}}/>
+          <circle cx="23" cy="23" r="7"   fill="#2DD4A5"/>
+          <circle cx="23" cy="23" r="3.5" style={{fill:'var(--ink-inner)'}}/>
+        </svg>
+      );
+    }
+
+    function Wordmark({ size = 'text-lg' }) {
+      return (
+        <span className={`${size} font-sans leading-none`} aria-label="NqshLab">
+          <span className="font-extrabold" style={{color:'var(--fg)'}}>Nqsh</span>
+          <span className="font-normal" style={{color:'var(--teal-link)'}}>Lab</span>
+        </span>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ICONS
+    ═══════════════════════════════════════════════════════ */
+    function ChevronIcon({ className = 'w-4 h-4', style }) {
+      return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      );
+    }
+    function ArrowIcon({ className = 'w-4 h-4' }) {
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LAYOUT HELPERS
+    ═══════════════════════════════════════════════════════ */
+    function Container({ children, className = '' }) {
+      return <div className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>;
+    }
+
+    function SectionHeader({ label, title, accent, subtitle, center = true }) {
+      return (
+        <div className={center ? 'text-center' : ''}>
+          {label && <div className="mono-label">{label}</div>}
+          <h2 className="font-display font-normal"
+            style={{fontSize:'clamp(1.75rem,3.5vw,2.625rem)',lineHeight:1.1,letterSpacing:'-0.02em',color:'var(--fg)'}}>
+            {accent
+              ? <>{title} <em style={{color:'var(--teal-link)',fontStyle:'italic'}}>{accent}</em></>
+              : title}
+          </h2>
+          {subtitle && (
+            <p className={`mt-4 text-base leading-relaxed font-sans ${center ? 'max-w-2xl mx-auto' : 'max-w-2xl'}`}
+               style={{color:'var(--fg-md)'}}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════════════════════ */
+    function Navbar({ setPage, user, onLogout, theme, setTheme, lang, setLang }) {
+      const n = T[lang].nav;
+      const [open, setOpen] = useState(false);
+      const links = [['#why-us', n.why], ['#how-it-works', n.how], ['#faq', n.faq]];
+
+      return (
+        <header className="sticky top-0 z-50"
+          style={{background:'var(--nav-bg)',backdropFilter:'blur(12px)',borderBottom:'1px solid var(--border-sm)'}}>
+          <Container>
+            <div className="flex items-center justify-between h-16">
+              <a href="#" className="flex items-center gap-2.5">
+                <NqshMark size={28} />
+                <Wordmark size="text-[17px]" />
+              </a>
+
+              <nav className="hidden md:flex items-center gap-7">
+                {links.map(([href, label]) => (
+                  <a key={href} href={href} className="text-sm font-medium font-sans"
+                    style={{color:'var(--fg-md)',transition:'color .15s'}}
+                    onMouseEnter={e=>e.currentTarget.style.color='var(--fg)'}
+                    onMouseLeave={e=>e.currentTarget.style.color='var(--fg-md)'}>
+                    {label}
+                  </a>
+                ))}
+              </nav>
+
+              <div className="flex items-center gap-2.5">
+                <LangBtn lang={lang} setLang={setLang} />
+                <ThemeBtn theme={theme} setTheme={setTheme} />
+                {user ? (
+                  <>
+                    <span className="hidden md:block text-sm font-medium" style={{color:'var(--fg-md)'}}>
+                      {user.name || user.email}
+                    </span>
+                    <button onClick={onLogout}
+                      className="hidden md:inline-flex items-center gap-2 font-semibold text-sm px-5 py-2.5 rounded-xl"
+                      style={{background:'rgba(255,80,60,0.1)',color:'#FF503C',border:'1px solid rgba(255,80,60,0.2)',cursor:'pointer',transition:'opacity .15s'}}
+                      onMouseEnter={e=>e.currentTarget.style.opacity='0.8'}
+                      onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                      {n.signout}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => setPage('signin')}
+                      className="hidden md:block text-sm font-medium"
+                      style={{color:'var(--fg-md)',background:'none',border:'none',cursor:'pointer',transition:'color .15s'}}
+                      onMouseEnter={e=>e.currentTarget.style.color='var(--fg)'}
+                      onMouseLeave={e=>e.currentTarget.style.color='var(--fg-md)'}>
+                      {n.signin}
+                    </button>
+                    <button onClick={() => setPage('signup')}
+                      className="hidden md:inline-flex items-center gap-2 font-semibold text-sm px-5 py-2.5 rounded-xl"
+                      style={{background:'#2DD4A5',color:'#071E1B',border:'none',cursor:'pointer',transition:'opacity .15s'}}
+                      onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
+                      onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                      {n.signup}
+                    </button>
+                  </>
+                )}
+                <button onClick={() => setOpen(!open)} className="md:hidden p-1.5 rounded-md"
+                  style={{color:'var(--fg-md)'}} aria-label="Toggle menu">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d={open ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {open && (
+              <nav className="md:hidden py-4 flex flex-col gap-4" style={{borderTop:'1px solid var(--border-sm)'}}>
+                {links.map(([href, label]) => (
+                  <a key={href} href={href} onClick={() => setOpen(false)}
+                    className="text-sm font-medium" style={{color:'var(--fg-md)'}}>
+                    {label}
+                  </a>
+                ))}
+                {user ? (
+                  <>
+                    <span className="text-sm" style={{color:'var(--fg-md)'}}>{user.name || user.email}</span>
+                    <button onClick={() => { onLogout(); setOpen(false); }}
+                      className="text-sm font-semibold text-left" style={{color:'#FF503C',background:'none',border:'none',cursor:'pointer'}}>
+                      {n.signout}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => { setPage('signin'); setOpen(false); }}
+                      className="text-sm font-medium text-left" style={{color:'var(--fg-md)',background:'none',border:'none',cursor:'pointer'}}>
+                      {n.signin}
+                    </button>
+                    <button onClick={() => { setPage('signup'); setOpen(false); }}
+                      className="text-sm font-semibold text-left" style={{color:'var(--teal-link)',background:'none',border:'none',cursor:'pointer'}}>
+                      {n.signup}
+                    </button>
+                  </>
+                )}
+              </nav>
+            )}
+          </Container>
+        </header>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       AUTH PAGE
+    ═══════════════════════════════════════════════════════ */
+    function AuthPage({ initialTab = 'signin', setPage, theme, lang }) {
+      const ta = T[lang].auth;
+      const [tab, setTab] = useState(initialTab);
+      const [form, setForm] = useState({ name:'', email:'', password:'', confirm:'', field:'', degree:'', fieldOther:'', degreeOther:'' });
+      const [showPass, setShowPass] = useState(false);
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+      const isSignUp = tab === 'signup';
+
+      const handleSubmit = async (e) => {
+        e.preventDefault(); setError(''); setLoading(true);
+        try {
+          if (isSignUp) {
+            if (!form.name || !form.email || !form.password) throw new Error('Please fill in all fields.');
+            if (!form.field || !form.degree) throw new Error('Please select your field and degree.');
+            const isOtherField = form.field === ta.fields[ta.fields.length - 1];
+            const isOtherDegree = form.degree === ta.degrees[ta.degrees.length - 1];
+            if (isOtherField && !form.fieldOther.trim()) throw new Error(lang === 'ar' ? 'يرجى تحديد مجالك.' : 'Please specify your field of expertise.');
+            if (isOtherDegree && !form.degreeOther.trim()) throw new Error(lang === 'ar' ? 'يرجى تحديد شهادتك.' : 'Please specify your highest degree.');
+            if (form.password !== form.confirm) throw new Error('Passwords do not match.');
+            const cred = await auth.createUserWithEmailAndPassword(form.email, form.password);
+            await cred.user.updateProfile({ displayName: form.name });
+            const uid = cred.user.uid;
+            localStorage.setItem(`nqsh_role_${uid}`,  'annotator');
+            localStorage.setItem(`nqsh_field_${uid}`, isOtherField ? form.fieldOther.trim() : form.field);
+            localStorage.setItem(`nqsh_degree_${uid}`, isOtherDegree ? form.degreeOther.trim() : form.degree);
+            window.location.href = 'annotator.html';
+          } else {
+            if (!form.email || !form.password) throw new Error('Please fill in all fields.');
+            const cred = await auth.signInWithEmailAndPassword(form.email, form.password);
+            const role = localStorage.getItem(`nqsh_role_${cred.user.uid}`) || '';
+            if (role === 'annotator') window.location.href = 'annotator.html';
+            else if (role === 'client') window.location.href = 'client.html';
+            else setPage('landing');
+          }
+        } catch (err) {
+          let msg = err.message.replace('Firebase: ', '');
+          if (err.code === 'auth/email-already-in-use') msg = 'Email is already in use.';
+          if (err.code === 'auth/invalid-credential') msg = 'Invalid email or password.';
+          setError(msg);
+        } finally { setLoading(false); }
+      };
+
+      const inp = {
+        width:'100%', background:'var(--surface)', border:'1px solid var(--border)',
+        borderRadius:'10px', padding:'12px 14px', color:'var(--fg)', fontSize:'14px',
+        fontFamily:"'ThmanyahSans', system-ui, sans-serif", outline:'none',
+        transition:'border-color .15s', colorScheme: theme === 'dark' ? 'dark' : 'light',
+      };
+
+      return (
+        <div className="grid-bg min-h-screen flex flex-col" style={{background:'var(--bg)'}}>
+          <div className="px-6 py-5 flex items-center justify-between max-w-6xl mx-auto w-full">
+            <button onClick={() => setPage('landing')} className="flex items-center gap-2.5"
+              style={{background:'none',border:'none',cursor:'pointer'}}>
+              <NqshMark size={26} /><Wordmark size="text-[16px]" />
+            </button>
+            <button onClick={() => setPage('landing')} className="text-sm font-mono"
+              style={{color:'var(--fg-vl)',background:'none',border:'none',cursor:'pointer',transition:'color .15s'}}
+              onMouseEnter={e=>e.currentTarget.style.color='var(--fg-md)'}
+              onMouseLeave={e=>e.currentTarget.style.color='var(--fg-vl)'}>
+              {ta.back}
+            </button>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center px-4 py-12">
+            <div className="w-full max-w-md">
+              <div className="absolute pointer-events-none" style={{width:'400px',height:'400px',borderRadius:'50%',background:'radial-gradient(circle, var(--teal-vl) 0%, transparent 70%)',transform:'translate(-50%,-50%)',left:'50%',top:'50%'}} />
+              <div className="relative glass rounded-2xl p-8 md:p-10" style={{border:'1px solid var(--border-hi)'}}>
+                <div className="flex mb-8 rounded-xl p-1" style={{background:'var(--surface)',border:'1px solid var(--border-sm)'}}>
+                  {[['signin', ta.tabSignin],['signup', ta.tabSignup]].map(([t, label]) => (
+                    <button key={t} onClick={() => setTab(t)} className="flex-1 py-2 text-sm font-semibold rounded-lg"
+                      style={{background:tab===t?'#2DD4A5':'transparent',color:tab===t?'#071E1B':'var(--fg-lo)',border:'none',cursor:'pointer',transition:'all .2s'}}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                <h1 className="font-display font-normal mb-1"
+                  style={{fontSize:'1.75rem',lineHeight:1.1,letterSpacing:'-0.02em',color:'var(--fg)'}}>
+                  {isSignUp
+                    ? <>{ta.createTitle} <em style={{color:'var(--teal-link)',fontStyle:'italic'}}>{ta.createAccent}</em></>
+                    : <>{ta.signinTitle} <em style={{color:'var(--teal-link)',fontStyle:'italic'}}>{ta.signinAccent}</em></>}
+                </h1>
+                <p className="text-sm mb-7" style={{color:'var(--fg-lo)'}}>
+                  {isSignUp ? ta.createSub : ta.signinSub}
+                </p>
+
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                  {error && (
+                    <div className="p-3 rounded-lg text-sm"
+                      style={{background:'rgba(255,80,60,0.1)',color:'#FF503C',border:'1px solid rgba(255,80,60,0.2)'}}>
+                      {error}
+                    </div>
+                  )}
+                  {isSignUp && (
+                    <div>
+                      <label className="block text-xs font-mono mb-2"
+                        style={{color:'var(--fg-lo)',letterSpacing:'0.1em',textTransform:'uppercase'}}>{ta.name}</label>
+                      <input type="text" placeholder={ta.namePh} value={form.name}
+                        onChange={e=>setForm(f=>({...f,name:e.target.value}))} style={inp}
+                        onFocus={e=>e.target.style.borderColor='var(--border-hi)'}
+                        onBlur={e=>e.target.style.borderColor='var(--border)'} />
+                    </div>
+                  )}
+                  {isSignUp && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-mono mb-2"
+                          style={{color:'var(--fg-lo)',letterSpacing:'0.1em',textTransform:'uppercase'}}>{ta.field}</label>
+                        <select value={form.field} onChange={e=>setForm(f=>({...f,field:e.target.value,fieldOther:''}))}
+                          style={{...inp,cursor:'pointer'}}
+                          onFocus={e=>e.target.style.borderColor='var(--border-hi)'}
+                          onBlur={e=>e.target.style.borderColor='var(--border)'}>
+                          <option value="">{ta.fieldPh}</option>
+                          {ta.fields.map(f=><option key={f} value={f}>{f}</option>)}
+                        </select>
+                        {form.field === ta.fields[ta.fields.length-1] && (
+                          <input type="text" placeholder={ta.otherFieldPh} value={form.fieldOther}
+                            onChange={e=>setForm(f=>({...f,fieldOther:e.target.value}))}
+                            style={{...inp,marginTop:'8px'}}
+                            onFocus={e=>e.target.style.borderColor='var(--border-hi)'}
+                            onBlur={e=>e.target.style.borderColor='var(--border)'} />
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-xs font-mono mb-2"
+                          style={{color:'var(--fg-lo)',letterSpacing:'0.1em',textTransform:'uppercase'}}>{ta.degree}</label>
+                        <select value={form.degree} onChange={e=>setForm(f=>({...f,degree:e.target.value,degreeOther:''}))}
+                          style={{...inp,cursor:'pointer'}}
+                          onFocus={e=>e.target.style.borderColor='var(--border-hi)'}
+                          onBlur={e=>e.target.style.borderColor='var(--border)'}>
+                          <option value="">{ta.degreePh}</option>
+                          {ta.degrees.map(d=><option key={d} value={d}>{d}</option>)}
+                        </select>
+                        {form.degree === ta.degrees[ta.degrees.length-1] && (
+                          <input type="text" placeholder={ta.otherDegreePh} value={form.degreeOther}
+                            onChange={e=>setForm(f=>({...f,degreeOther:e.target.value}))}
+                            style={{...inp,marginTop:'8px'}}
+                            onFocus={e=>e.target.style.borderColor='var(--border-hi)'}
+                            onBlur={e=>e.target.style.borderColor='var(--border)'} />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-xs font-mono mb-2"
+                      style={{color:'var(--fg-lo)',letterSpacing:'0.1em',textTransform:'uppercase'}}>{ta.email}</label>
+                    <input type="email" placeholder={ta.emailPh} value={form.email}
+                      onChange={e=>setForm(f=>({...f,email:e.target.value}))} style={inp}
+                      onFocus={e=>e.target.style.borderColor='var(--border-hi)'}
+                      onBlur={e=>e.target.style.borderColor='var(--border)'} />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-mono"
+                        style={{color:'var(--fg-lo)',letterSpacing:'0.1em',textTransform:'uppercase'}}>{ta.password}</label>
+                      {!isSignUp && (
+                        <a href="#" className="text-xs font-mono" style={{color:'var(--teal-md)',transition:'color .15s'}}
+                          onMouseEnter={e=>e.currentTarget.style.color='var(--teal-link)'}
+                          onMouseLeave={e=>e.currentTarget.style.color='var(--teal-md)'}>
+                          {ta.forgot}
+                        </a>
+                      )}
+                    </div>
+                    <div style={{position:'relative'}}>
+                      <input type={showPass?'text':'password'} placeholder="••••••••" value={form.password}
+                        onChange={e=>setForm(f=>({...f,password:e.target.value}))}
+                        style={{...inp,paddingRight:'42px'}}
+                        onFocus={e=>e.target.style.borderColor='var(--border-hi)'}
+                        onBlur={e=>e.target.style.borderColor='var(--border)'} />
+                      <button type="button" onClick={()=>setShowPass(p=>!p)}
+                        style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:'var(--fg-vl)',padding:0}}>
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          {showPass
+                            ? <><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></>
+                            : <><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
+                          }
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  {isSignUp && (
+                    <div>
+                      <label className="block text-xs font-mono mb-2"
+                        style={{color:'var(--fg-lo)',letterSpacing:'0.1em',textTransform:'uppercase'}}>{ta.confirm}</label>
+                      <input type="password" placeholder="••••••••" value={form.confirm}
+                        onChange={e=>setForm(f=>({...f,confirm:e.target.value}))} style={inp}
+                        onFocus={e=>e.target.style.borderColor='var(--border-hi)'}
+                        onBlur={e=>e.target.style.borderColor='var(--border)'} />
+                    </div>
+                  )}
+                  <button type="submit" disabled={loading}
+                    className="w-full font-semibold text-sm py-3.5 rounded-xl mt-1"
+                    style={{background:'#2DD4A5',color:'#071E1B',border:'none',cursor:loading?'not-allowed':'pointer',opacity:loading?0.7:1,transition:'opacity .15s',boxShadow:'0 0 30px rgba(45,212,165,0.2)'}}
+                    onMouseEnter={e=>{if(!loading)e.currentTarget.style.opacity='0.88'}}
+                    onMouseLeave={e=>{if(!loading)e.currentTarget.style.opacity='1'}}>
+                    {loading ? ta.loading : (isSignUp ? ta.submitCreate : ta.submitSignin)}
+                  </button>
+                </form>
+
+                <p className="text-center text-xs font-mono mt-6" style={{color:'var(--fg-vl)'}}>
+                  {isSignUp ? ta.switchToSignin : ta.switchToSignup}{' '}
+                  <button onClick={()=>setTab(isSignUp?'signin':'signup')}
+                    style={{color:'var(--teal-link)',background:'none',border:'none',cursor:'pointer',transition:'opacity .15s'}}
+                    onMouseEnter={e=>e.currentTarget.style.opacity='0.7'}
+                    onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                    {isSignUp ? ta.switchLinkSignin : ta.switchLinkSignup}
+                  </button>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════ */
+    function Hero({ t }) {
+      const h = t.hero;
+      return (
+        <section className="grid-bg relative overflow-hidden py-24 md:py-36">
+          <div className="absolute inset-0 pointer-events-none"
+            style={{background:'radial-gradient(ellipse 70% 60% at 70% 50%, var(--teal-vl) 0%, transparent 70%)'}} />
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h1 className="font-display font-normal mb-6"
+              style={{fontSize:'clamp(2.8rem,7vw,5rem)',lineHeight:1.04,letterSpacing:'-0.025em',color:'var(--fg)'}}>
+              {h.h1}{' '}
+              <em style={{color:'var(--teal-link)',fontStyle:'italic'}}>{h.h1accent}</em>
+            </h1>
+            <p className="font-sans text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10"
+               style={{color:'var(--fg-md)'}}>
+              {h.sub}
+            </p>
+            <a href={`mailto:${EMAIL}`}
+              className="inline-flex items-center gap-2 font-mono text-base"
+              style={{color:'var(--teal-link)',transition:'opacity .15s'}}
+              onMouseEnter={e=>e.currentTarget.style.opacity='0.7'}
+              onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+              {EMAIL}<ArrowIcon className="w-4 h-4" />
+            </a>
+            <div className="mt-14 pt-10" style={{borderTop:'1px solid var(--border-sm)'}}>
+              <p className="font-mono text-xs mb-5 uppercase" style={{color:'var(--fg-vl)',letterSpacing:'0.2em'}}>
+                {h.domainsLabel}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {h.domains.map(d => (
+                  <span key={d} className="font-mono text-xs px-3 py-1.5 rounded-full"
+                    style={{background:'var(--surface)',border:'1px solid var(--border-sm)',color:'var(--fg-md)',letterSpacing:'0.06em'}}>
+                    {d}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       WHY US
+    ═══════════════════════════════════════════════════════ */
+    function WhyUs({ t }) {
+      const w = t.why;
+      return (
+        <section id="why-us" className="py-20 md:py-28 fade-top" style={{background:'var(--section-alt)'}}>
+          <Container>
+            <SectionHeader label={w.label} title={w.title} accent={w.accent} subtitle={w.sub} />
+            <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              {w.features.map(({ title, desc }) => (
+                <div key={title} className="glass p-5 rounded-xl">
+                  <div className="w-1.5 h-1.5 rounded-full mb-3" style={{background:'#2DD4A5'}} />
+                  <h4 className="font-semibold text-sm mb-1" style={{color:'var(--fg)'}}>{title}</h4>
+                  <p className="text-xs leading-relaxed" style={{color:'var(--fg-lo)'}}>{desc}</p>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════════════════ */
+    function HowItWorks({ t }) {
+      const h = t.how;
+      return (
+        <section id="how-it-works" className="py-20 md:py-28 fade-top">
+          <Container>
+            <SectionHeader label={h.label} title={h.title} accent={h.accent} subtitle={h.sub} />
+            <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
+              {h.steps.map(({ num, title, body }) => (
+                <div key={num}>
+                  <span className="block font-mono font-medium mb-4 select-none"
+                    style={{fontSize:'3rem',lineHeight:1,color:'var(--teal-vl)',letterSpacing:'-0.02em'}} aria-hidden="true">
+                    {num}
+                  </span>
+                  <h3 className="font-semibold text-sm mb-2" style={{color:'var(--fg)'}}>{title}</h3>
+                  <p className="text-sm leading-relaxed" style={{color:'var(--fg-lo)'}}>{body}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-12 text-center">
+              <a href={BOOK_URL} className="inline-flex items-center gap-2 text-sm font-semibold font-mono"
+                style={{color:'var(--teal-link)',letterSpacing:'0.04em',transition:'opacity .15s'}}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.7'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                {h.cta}<ArrowIcon className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </Container>
+        </section>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       BOTTOM CTA
+    ═══════════════════════════════════════════════════════ */
+    function BottomCTA({ t }) {
+      const c = t.cta;
+      return (
+        <section id="book-call" className="py-20 md:py-28 fade-top">
+          <Container>
+            <div className="grid-bg rounded-3xl px-8 md:px-14 py-14 md:py-16 text-center relative overflow-hidden"
+              style={{background:'var(--teal-surface)',border:'1px solid var(--border-hi)'}}>
+              <div className="absolute inset-0 pointer-events-none"
+                style={{background:'radial-gradient(ellipse 60% 50% at 50% 100%, var(--teal-vl) 0%, transparent 70%)'}} />
+              <div className="relative z-10">
+                <p className="font-mono text-xs uppercase tracking-widest mb-4"
+                  style={{color:'var(--teal-link)',letterSpacing:'0.2em'}}>{c.label}</p>
+                <h2 className="font-display font-normal mb-4"
+                  style={{fontSize:'clamp(2rem,4.5vw,3.25rem)',lineHeight:1.08,letterSpacing:'-0.02em',color:'var(--fg)'}}>
+                  {c.title}{' '}
+                  <em style={{color:'var(--teal-link)',fontStyle:'italic'}}>{c.accent}</em>
+                </h2>
+                <p className="text-base max-w-xl mx-auto mb-8" style={{color:'var(--fg-md)'}}>{c.sub}</p>
+                <a href={`mailto:${EMAIL}`}
+                  className="inline-flex items-center gap-2 font-mono text-base"
+                  style={{color:'var(--teal-link)',transition:'opacity .15s'}}
+                  onMouseEnter={e=>e.currentTarget.style.opacity='0.7'}
+                  onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                  {EMAIL}<ArrowIcon className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </Container>
+        </section>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FAQ
+    ═══════════════════════════════════════════════════════ */
+    function FAQItem({ q, a }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <div style={{borderBottom:'1px solid var(--border-sm)'}}>
+          <button onClick={()=>setOpen(p=>!p)}
+            className="w-full flex items-center justify-between py-5 text-left gap-4">
+            <span className="text-sm font-medium leading-snug"
+              style={{color:'var(--fg)',transition:'color .15s'}}
+              onMouseEnter={e=>e.currentTarget.style.color='var(--teal-link)'}
+              onMouseLeave={e=>e.currentTarget.style.color='var(--fg)'}>
+              {q}
+            </span>
+            <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+              style={{background:'var(--teal-surface)',border:'1px solid var(--border)',transform:open?'rotate(180deg)':'none',transition:'transform .2s'}}>
+              <ChevronIcon className="w-3.5 h-3.5" style={{color:'var(--teal-link)'}} />
+            </span>
+          </button>
+          {open && <p className="pb-5 text-sm leading-relaxed pr-10" style={{color:'var(--fg-md)'}}>{a}</p>}
+        </div>
+      );
+    }
+
+    function FAQ({ t }) {
+      const f = t.faq;
+      return (
+        <section id="faq" className="py-20 md:py-28 fade-top" style={{background:'var(--section-alt)'}}>
+          <Container>
+            <div className="max-w-3xl mx-auto">
+              <SectionHeader label={f.label} title={f.title} />
+              <div className="mt-10 glass rounded-2xl px-6 md:px-8">
+                {f.items.map(({ q, a }) => <FAQItem key={q} q={q} a={a} />)}
+              </div>
+              <p className="text-center mt-8 text-xs font-mono" style={{color:'var(--fg-vl)'}}>
+                {f.footer}{' '}
+                <a href={`mailto:${EMAIL}`} style={{color:'var(--teal-link)'}} className="hover:underline">
+                  {f.footerLink}
+                </a>
+              </p>
+            </div>
+          </Container>
+        </section>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════ */
+    function Footer({ t }) {
+      const f = t.footer;
+      const year = new Date().getFullYear();
+      return (
+        <footer style={{background:'var(--bg-deep)',borderTop:'1px solid var(--border-sm)'}} className="py-10">
+          <Container>
+            <div className="flex flex-col md:flex-row items-start justify-between gap-8">
+              <div className="max-w-xs">
+                <a href="#" className="flex items-center gap-2.5 mb-3">
+                  <NqshMark size={24} /><Wordmark size="text-base" />
+                </a>
+                <p className="text-xs leading-relaxed" style={{color:'var(--fg-vl)'}}>{f.tagline}</p>
+                <p className="mt-3 font-mono text-xs" style={{color:'var(--teal-lo)',letterSpacing:'0.1em'}}>{WEBSITE}</p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-8 sm:gap-12">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-widest mb-3"
+                    style={{color:'var(--fg-vl)',letterSpacing:'0.18em'}}>{f.product}</p>
+                  <ul className="space-y-2">
+                    {[['#why-us', T['en'].nav.why],['#how-it-works', T['en'].nav.how]].map(([h,l]) => (
+                      <li key={h}><a href={h} className="text-sm"
+                        style={{color:'var(--fg-lo)',transition:'color .15s'}}
+                        onMouseEnter={e=>e.currentTarget.style.color='var(--fg)'}
+                        onMouseLeave={e=>e.currentTarget.style.color='var(--fg-lo)'}>{l}</a></li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-widest mb-3"
+                    style={{color:'var(--fg-vl)',letterSpacing:'0.18em'}}>{f.company}</p>
+                  <ul className="space-y-2">
+                    {[['#faq','FAQ'],[`mailto:${EMAIL}`,'Contact'],[LINKEDIN,'LinkedIn']].map(([h,l]) => (
+                      <li key={l}><a href={h} className="text-sm"
+                        style={{color:'var(--fg-lo)',transition:'color .15s'}}
+                        onMouseEnter={e=>e.currentTarget.style.color='var(--fg)'}
+                        onMouseLeave={e=>e.currentTarget.style.color='var(--fg-lo)'}>{l}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3"
+              style={{borderTop:'1px solid var(--border-sm)'}}>
+              <p className="font-mono text-xs" style={{color:'var(--fg-ul)'}}>{f.copyright(year)}</p>
+              <a href={`mailto:${EMAIL}`} className="font-mono text-xs"
+                style={{color:'var(--teal-lo)',transition:'color .15s'}}
+                onMouseEnter={e=>e.currentTarget.style.color='var(--teal-link)'}
+                onMouseLeave={e=>e.currentTarget.style.color='var(--teal-lo)'}>
+                {EMAIL}
+              </a>
+            </div>
+          </Container>
+        </footer>
+      );
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       APP
+    ═══════════════════════════════════════════════════════ */
+    function App() {
+      const [page, setPage] = useState('landing');
+      const [user, setUser] = useState(null);
+      const [appLoading, setAppLoading] = useState(true);
+      const [theme, setTheme] = useTheme();
+      const [lang, setLang] = useLang();
+      const t = T[lang];
+
+      useEffect(() => {
+        const unsub = auth.onAuthStateChanged((u) => {
+          if (u) {
+            const role = localStorage.getItem(`nqsh_role_${u.uid}`) || '';
+            if (role === 'annotator') { window.location.href = 'annotator.html'; return; }
+            if (role === 'client')    { window.location.href = 'client.html';    return; }
+            if (role === 'admin')     { window.location.href = 'admin.html';     return; }
+            setUser({ name: u.displayName, email: u.email, role });
+          } else {
+            setUser(null);
+          }
+          setAppLoading(false);
+        });
+        return () => unsub();
+      }, []);
+
+      if (appLoading) {
+        return (
+          <div style={{minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <div style={{width:'40px',height:'40px',border:'3px solid var(--teal-vl)',borderTopColor:'var(--teal)',borderRadius:'50%',animation:'spin 1s linear infinite'}} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        );
+      }
+
+      if (page === 'signin' || page === 'signup') {
+        return (
+          <div style={{minHeight:'100vh',background:'var(--bg)',fontFamily:"'ThmanyahSans', system-ui, sans-serif"}}>
+            <AuthPage initialTab={page} setPage={setPage} theme={theme} lang={lang} />
+          </div>
+        );
+      }
+
+      return (
+        <div style={{minHeight:'100vh',background:'var(--bg)',color:'var(--fg)',fontFamily:"'ThmanyahSans', system-ui, sans-serif"}}>
+          <Navbar setPage={setPage} user={user} onLogout={() => auth.signOut()}
+            theme={theme} setTheme={setTheme} lang={lang} setLang={setLang} />
+          <main>
+            <Hero t={t} />
+            <WhyUs t={t} />
+            <HowItWorks t={t} />
+            <BottomCTA t={t} />
+            <FAQ t={t} />
+          </main>
+          <Footer t={t} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

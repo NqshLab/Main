@@ -1,0 +1,41 @@
+<svg width="400" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>NqshLab Logo</title>
+  <desc>NqshLab dark teal knowledge graph logo with wordmark</desc>
+
+  <!-- Background -->
+  <rect width="400" height="120" fill="#071E1B" rx="16"/>
+
+  <!-- Knowledge Graph Icon (centered at 60,60) -->
+  <!-- Spokes -->
+  <line x1="60" y1="18" x2="60" y2="40" stroke="#2DD4A5" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+  <line x1="60" y1="80" x2="60" y2="102" stroke="#2DD4A5" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+  <line x1="88" y1="34" x2="70" y2="53" stroke="rgba(255,255,255,0.35)" stroke-width="1.6" stroke-linecap="round"/>
+  <line x1="88" y1="86" x2="70" y2="67" stroke="rgba(255,255,255,0.35)" stroke-width="1.6" stroke-linecap="round"/>
+  <line x1="32" y1="34" x2="50" y2="53" stroke="rgba(255,255,255,0.35)" stroke-width="1.6" stroke-linecap="round"/>
+  <line x1="32" y1="86" x2="50" y2="67" stroke="rgba(255,255,255,0.35)" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- Horizontal ring lines -->
+  <line x1="32" y1="34" x2="88" y2="34" stroke="rgba(45,212,165,0.18)" stroke-width="1.2"/>
+  <line x1="32" y1="86" x2="88" y2="86" stroke="rgba(45,212,165,0.18)" stroke-width="1.2"/>
+
+  <!-- Outer nodes -->
+  <circle cx="60" cy="14" r="4.5" fill="#2DD4A5"/>
+  <circle cx="92" cy="32" r="3.5" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="92" cy="88" r="3.5" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="60" cy="106" r="4.5" fill="#2DD4A5"/>
+  <circle cx="28" cy="32" r="3.5" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="28" cy="88" r="3.5" fill="rgba(255,255,255,0.6)"/>
+
+  <!-- Center node -->
+  <circle cx="60" cy="60" r="9" fill="#2DD4A5"/>
+  <circle cx="60" cy="60" r="4.5" fill="#071E1B"/>
+
+  <!-- Wordmark -->
+  <text x="128" y="52" font-family="'Helvetica Neue', Arial, sans-serif" font-size="34" font-weight="800" fill="#FFFFFF" letter-spacing="-0.04em">Nqsh</text>
+  <text x="234" y="52" font-family="'Helvetica Neue', Arial, sans-serif" font-size="34" font-weight="300" fill="#2DD4A5" letter-spacing="-0.04em">Lab</text>
+
+  <!-- Tagline -->
+  <text x="128" y="76" font-family="'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="400" fill="rgba(255,255,255,0.42)" letter-spacing="0.06em">TRAIN YOUR AI ON REAL EXPERTISE</text>
+
+  <!-- Divider -->
+  <line x1="128" y1="60" x2="356" y2="60" stroke="rgba(255,255,255,0.08)" stroke-width="0.8"/>
+</svg>
