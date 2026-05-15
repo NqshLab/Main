@@ -93,12 +93,13 @@
        FIREBASE INITIALIZATION
     ═══════════════════════════════════════════════════════ */
     const firebaseConfig = {
-      apiKey: "AIzaSyACErx-oPDy-LHw1RkhNak1nwYuDbFOMBs",
-      authDomain: "nqshlab.firebaseapp.com",
-      projectId: "nqshlab",
-      storageBucket: "nqshlab.firebasestorage.app",
-      messagingSenderId: "19755138224",
-      appId: "1:19755138224:web:e75f9d694267cb32ac4f75",
+      apiKey: "AIzaSyAclIDr5PsasE2moxyiK6_VdncT19V8EnY",
+      authDomain: "nqshlab-dc2f5.firebaseapp.com",
+      projectId: "nqshlab-dc2f5",
+      storageBucket: "nqshlab-dc2f5.firebasestorage.app",
+      messagingSenderId: "418196415825",
+      appId: "1:418196415825:web:9befd44b279c900a755f70",
+      measurementId: "G-DLQSP23J3E",
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -279,7 +280,7 @@
               : 'You need a client account to access this page.'
             }
           </p>
-          <a href="standalone.html"
+          <a href="index.html"
             className="inline-flex items-center gap-2 font-semibold text-sm px-6 py-3 rounded-xl"
             style={{background:'#2DD4A5', color:'#071E1B'}}
             onMouseEnter={e=>e.currentTarget.style.opacity='0.88'}
@@ -330,7 +331,7 @@
             <div className="flex items-center justify-between h-16">
 
               <div className="flex items-center gap-3">
-                <a href="standalone.html" className="flex items-center gap-2.5">
+                <a href="index.html" className="flex items-center gap-2.5">
                   <NqshMark size={26} />
                   <Wordmark size="text-[16px]" />
                 </a>
@@ -346,7 +347,7 @@
                   style={{color:'rgba(255,255,255,0.55)'}}>
                   {user.name || user.email}
                 </span>
-                <a href="standalone.html"
+                <a href="index.html"
                   className="hidden md:block text-sm font-medium font-sans"
                   style={{color:'rgba(255,255,255,0.35)', transition:'color .15s'}}
                   onMouseEnter={e=>e.currentTarget.style.color='rgba(255,255,255,0.65)'}
